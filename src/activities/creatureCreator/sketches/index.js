@@ -29,10 +29,31 @@ const BodyShape = Object.freeze({
 });
 
 /**
+ * SIZES
+ */
+let body = {
+  width: (CANVAS_WIDTH / 2 - MIN_BODY_SIZE) * 0.5 + MIN_BODY_SIZE,
+  height: (CANVAS_HEIGHT / 2 - MIN_BODY_SIZE) * 0.5 + MIN_BODY_SIZE
+};
+body.minX = Math.floor((CANVAS_WIDTH - body.width) / 2);
+body.minY = Math.floor((CANVAS_HEIGHT - body.height) / 2);
+let bodyColor = [127, 127, 127];
+let mouth = {
+  width: (MAX_MOUTH_SIZE - MIN_MOUTH_SIZE) * 0.5 + MIN_MOUTH_SIZE,
+  height: (MAX_MOUTH_SIZE - MIN_MOUTH_SIZE) * 0.5 + MIN_MOUTH_SIZE
+};
+let eye = {
+  size: (body.width / 2 - MIN_EYE_SIZE) * 0.5 + MIN_EYE_SIZE,
+  yPos: body.height
+};
+eye.leftX = (CENTER_X - eye.size / 2 - body.minX) * 0.5 + body.minX;
+let creatureType = 0;
+
+/**
  * P5
  */
 const sketch = p5 => {
-  let eyes, drawBody, drawMouth;
+  let eyes, drawMouth;
 
   p5.setup = () => {
     p5.createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -43,9 +64,7 @@ const sketch = p5 => {
     p5.clear();
     p5.background(CANVAS_BG_COLOR);
 
-    if (drawBody) {
-      drawBody();
-    }
+    drawBody();
 
     if (drawMouth) {
       drawMouth();
@@ -67,13 +86,46 @@ const sketch = p5 => {
     p5.ellipse(...pupil);
   };
 
-  p5.setCreature = type => {
-    const bodyShape = bodyShapeFor(type);
+  p5.setBodySize = (width_percent, height_percent) => {
+    body.width =
+      (CANVAS_WIDTH / 2 - MIN_BODY_SIZE) * width_percent + MIN_BODY_SIZE;
+    body.height =
+      (CANVAS_HEIGHT / 2 - MIN_BODY_SIZE) * height_percent + MIN_BODY_SIZE;
 
-    let body = {
-      width: randomInt(MIN_BODY_SIZE, CANVAS_WIDTH / 2),
-      height: randomInt(MIN_BODY_SIZE, CANVAS_HEIGHT / 2)
-    };
+    body.minX = Math.floor((CANVAS_WIDTH - body.width) / 2);
+    body.minY = Math.floor((CANVAS_HEIGHT - body.height) / 2);
+    draw();
+  };
+
+  p5.setMouthSize = (width_percent, height_percent) => {
+    mouth.width =
+      (MAX_MOUTH_SIZE - MIN_MOUTH_SIZE) * width_percent + MIN_MOUTH_SIZE;
+    mouth.height =
+      (MAX_MOUTH_SIZE - MIN_MOUTH_SIZE) * height_percent + MIN_MOUTH_SIZE;
+    draw();
+  };
+
+  p5.setBodyColor = (r, g, b) => {
+    bodyColor = [r, g, b];
+    draw();
+  };
+
+  p5.setEyeSizeAndPos = (
+    eye_size_percent,
+    left_eye_x_pos_percent,
+    eye_y_pos_percent
+  ) => {
+    eye.size =
+      (body.width / 2 - MIN_EYE_SIZE) * eye_size_percent + MIN_EYE_SIZE;
+    eye.leftX =
+      (CENTER_X - eye.size / 2 - body.minX) * left_eye_x_pos_percent +
+      body.minX;
+    eye.yPos = (body.height / 2) * eye_y_pos_percent + body.minY;
+    draw();
+  };
+
+  const drawBody = () => {
+    const bodyShape = bodyShapeFor(creatureType);
 
     if (bodyShape === BodyShape.Rect) {
       body.minX = Math.floor((CANVAS_WIDTH - body.width) / 2);
@@ -83,38 +135,36 @@ const sketch = p5 => {
       body.minY = CENTER_Y - body.height / 2;
     }
 
-    drawBody = () => {
-      p5.fill(randomInt(0, 255), randomInt(0, 255), randomInt(0, 255));
+    p5.fill(...bodyColor);
 
-      if (bodyShape === BodyShape.Rect) {
-        p5.rect(body.minX, body.minY, body.width, body.height, 10);
-      } else if (bodyShape === BodyShape.Ellipse) {
-        p5.ellipse(CENTER_X, CENTER_Y, body.width, body.height);
-      }
-    };
+    if (bodyShape === BodyShape.Rect) {
+      p5.rect(body.minX, body.minY, body.width, body.height, 10);
+    } else if (bodyShape === BodyShape.Ellipse) {
+      p5.ellipse(CENTER_X, CENTER_Y, body.width, body.height);
+    }
 
     // TODO: (madelynkasula) Make eye positioning more accurate for ellipse bodies.
-    const eyeSize = randomInt(MIN_EYE_SIZE, body.width / 2);
-    const leftEyeXPos = randomInt(body.minX, CENTER_X - eyeSize / 2);
+    const eyeSize = eye.size;
+    const leftEyeXPos = eye.leftX;
     const rightEyeXPos = CENTER_X + (CENTER_X - leftEyeXPos);
-    const eyeYPos = randomInt(body.minY, body.minY + body.height / 2);
+    const eyeYPos = eye.yPos;
     eyes = [[leftEyeXPos, eyeYPos, eyeSize], [rightEyeXPos, eyeYPos, eyeSize]];
-
     drawMouth = () => {
-      const mouthW = randomInt(MIN_MOUTH_SIZE, MAX_MOUTH_SIZE);
-      const mouthH = randomInt(MIN_MOUTH_SIZE, MAX_MOUTH_SIZE);
       const yPos = eyeYPos + eyeSize / 2 + MOUTH_TO_EYE_DISTANCE;
       p5.noFill();
 
-      if (type === CreatureType.Good) {
+      if (creatureType === CreatureType.Good) {
         // smile
-        p5.arc(CENTER_X, yPos, mouthW, mouthH, 0, Math.PI);
-      } else if (type === CreatureType.Bad) {
+        p5.arc(CENTER_X, yPos, mouth.width, mouth.height, 0, Math.PI);
+      } else if (creatureType === CreatureType.Bad) {
         // frown
-        p5.arc(CENTER_X, yPos, mouthW, mouthH, Math.PI, 2 * Math.PI);
+        p5.arc(CENTER_X, yPos, mouth.width, mouth.height, Math.PI, 2 * Math.PI);
       }
     };
+  };
 
+  p5.setCreature = type => {
+    creatureType = type;
     draw();
   };
 
