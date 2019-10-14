@@ -50,19 +50,19 @@ function getFishLocation(fishId) {
 
   // Generate the location based on the layout.
   if (layout === "random") {
-    for (var i = 0; i < 30; ++i) {
+    for (var i = 0; i < 100; ++i) {
       x = Math.floor(Math.random() * constants.canvasWidth);
       y = Math.floor(Math.random() * constants.canvasHeight);
     }
   } else if (layout === "grid") {
-    x = (fishId % 10) * 200;
-    y = Math.floor(fishId / 10) * 200;
+    x = (fishId % 10) * 100;
+    y = Math.floor(fishId / 10) * 100 + 100;
   } else if (layout === "diamondgrid") {
-    x = (fishId % 10) * 200 + (Math.floor(fishId / 10) % 2 === 1 ? -100 : 0);
-    y = Math.floor(fishId / 10) * 200;
+    x = (fishId % 6) * 200 + (Math.floor(fishId / 10) % 2 === 1 ? -100 : 0);
+    y = Math.floor(fishId / 6) * 100;
   } else if (layout === "line") {
-    x = fishId * 200;
-    y = 200;
+    x = fishId * 100;
+    y = 275;
   }
 
   return {x: x, y: y};
@@ -126,7 +126,7 @@ function drawFish(fish, results, palette, ctx) {
 }
 
 function drawRenderedFish(fishCanvas, x, y, palette, ctx) {
-  ctx.drawImage(fishCanvas, x, y);
+  ctx.drawImage(fishCanvas, x, y, 100, 50);
 }
 
 function loadFishImage(fishPart) {
@@ -211,7 +211,10 @@ function animateScreen() {
 
   fishes.forEach(fish => {
     const location = getFishLocation(fish.id);
-    const offsets = getSwayOffsets(fish.id);
+    let offsets = {offsetX: 0, offsetY: 0};
+    if (getState().currentMode !== Modes.Training) {
+      offsets = getSwayOffsets(fish.id);
+    }
     drawRenderedFish(
       fish.canvas,
       location.x + offsets.offsetX,
@@ -260,8 +263,6 @@ function DrawFade(amount, overlayColour)
   if (amount == 0) {
     return;
   }
-
-  console.log(amount);
 
   canvasCtx.globalAlpha = amount;
   canvasCtx.fillStyle = overlayColour;
