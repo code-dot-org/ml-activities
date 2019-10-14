@@ -10,11 +10,42 @@
       integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
       crossorigin="anonymous"
     />
+    <style>
+      #container {
+        position: relative;
+      }
+      #ui {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 1024px;
+        height: 576px;
+      }
+
+      button {
+        background-color: #aaf;
+        color: white;
+        font-size: 40px;
+        border-radius: 10px;
+        padding: 20px;
+      }
+
+      #test-button {
+        position: absolute;
+        right: 20px;
+        bottom: 20px;
+      }
+    </style>
   </head>
 
   <body>
     <div id="ml-activities"></div>
-    <canvas id="activity-canvas" />
+    <div id="container">
+      <canvas id="activity-canvas"></canvas>
+      <div id="ui">
+        <button id="test-button">test button</button>
+      </div>
+    </div>
     <script src="demo.js"></script>
   </body>
 </html>
