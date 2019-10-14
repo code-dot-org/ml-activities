@@ -11,27 +11,19 @@ $(document).ready(() => {
   canvas.width = constants.canvasWidth;
   canvas.height = constants.canvasHeight;
 
+  // Set up state
   const initialState = {
     currentMode: Modes.Training
   };
   setState(initialState);
 
+  // Initialize renderer
   initRenderer(canvas);
 
-  switch (initialState.currentMode) {
-    case Modes.Training:
-      initTraining(canvas);
-      break;
-    case Modes.Predicting:
-      initPredicting(canvas);
-      break;
-    case Modes.Pond:
-      initPond(canvas);
-      break;
-    default:
-      console.error('No mode specified');
-  }
+  // Initialize current model
+  initModel();
 
+  // Periodically switch mode
   window.setInterval(() => {
     const currentMode = getState().currentMode;
     if (currentMode === Modes.Training) {
@@ -41,5 +33,26 @@ $(document).ready(() => {
     } else if (currentMode === Modes.Pond) {
       setState({currentMode: Modes.Training});
     }
+
+    // Initialize this new model.
+    initModel();
   }, 4 * 1000);
 });
+
+// Initialize a model based on mode.
+// Should only be called when mode changes.
+function initModel() {
+  switch (getState().currentMode) {
+    case Modes.Training:
+      initTraining();
+      break;
+    case Modes.Predicting:
+      initPredicting();
+      break;
+    case Modes.Pond:
+      initPond();
+      break;
+    default:
+      console.error('No mode specified');
+  }
+}
