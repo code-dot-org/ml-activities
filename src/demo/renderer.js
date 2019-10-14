@@ -1,8 +1,8 @@
 import _ from 'lodash';
-import constants from './constants';
+import constants, {Modes} from './constants';
 import {FishBodyPart} from '../utils/fishData';
 import {generateRandomFish} from '../activities/hoc2019/SpritesheetFish';
-
+import {setState, getState} from './state';
 
 window.requestAnimFrame = (function(){
   return  window.requestAnimationFrame       ||
@@ -20,6 +20,7 @@ var $time = Date.now || function() {
 };
 
 let fishes = [],
+    currentBackgroundImageName,
     backgroundImage;
 
 function updatePos(fish) {
@@ -157,9 +158,6 @@ export const init = function(canvas) {
     }
   }
 
-  backgroundImage = new Image();
-  backgroundImage.src = 'images/underwater-background.jpg';
-
   fishes.forEach(fish => {
     fish.canvas = document.createElement('canvas');
     loadImages(fish.fish).then(results =>
@@ -173,6 +171,8 @@ export const init = function(canvas) {
   });
 
   function animateScreen() {
+    updateScreenElements();
+
     var ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(backgroundImage, 0, 0, constants.canvasWidth, constants.canvasHeight);
@@ -189,6 +189,24 @@ export const init = function(canvas) {
     });
 
     requestAnimFrame(animateScreen);
+  }
+
+  function updateScreenElements() {
+    let backgroundImageName;
+    const currentMode = getState().currentMode;
+    if (currentMode === Modes.Training) {
+      backgroundImageName = "classroom";
+    } else if (currentMode === Modes.Predicting) {
+      backgroundImageName = "pipes";
+    } else if (currentMode === Modes.Pond) {
+      backgroundImageName = "underwater";
+    }
+
+    if (currentBackgroundImageName !== backgroundImageName) {
+      backgroundImage = new Image();
+      backgroundImage.src = `images/${backgroundImageName}-background.png`;
+      currentBackgroundImageName = backgroundImageName;
+    }
   }
 
   requestAnimFrame(animateScreen);
