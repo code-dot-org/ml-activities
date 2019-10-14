@@ -21,7 +21,10 @@ var $time = Date.now || function() {
 
 let fishes = [],
     currentBackgroundImageName,
-    backgroundImage;
+    backgroundImage,
+    currentModeStartTime,
+    canvas,
+    canvasCtx;
 
 function getSwayOffsets(fishId) {
   var swayValue = (($time() * 360 / (20 * 1000)) + (fishId+1) * 10) % 360;
@@ -173,7 +176,11 @@ function colorFromType(palette, type) {
 
 // Initialize the renderer once.
 // This will generate canvases with the fish collection.
-export const init = function(canvas) {
+// It will start the animation farme callbacks from the browser.
+export const init = function(canvasParam) {
+  canvas = canvasParam;
+  canvasCtx = canvas.getContext('2d');
+
   for (let i = 0; i < 30; i++) {
     fishes.push(getRandomFish(i));
   }
@@ -190,47 +197,86 @@ export const init = function(canvas) {
     );
   });
 
-  function animateScreen() {
-    // Update static screen elements that might change occasionally,
-    // e.g. background image.
-    updateScreenElements();
+  requestAnimFrame(animateScreen);
+}
 
-    var ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(backgroundImage, 0, 0, constants.canvasWidth, constants.canvasHeight);
+function animateScreen() {
+  // Update static screen elements that might change occasionally,
+  // e.g. background image.
+  updateScreenElements();
 
-    fishes.forEach(fish => {
-      const location = getFishLocation(fish.id);
-      const offsets = getSwayOffsets(fish.id);
-      drawRenderedFish(
-        fish.canvas,
-        location.x + offsets.offsetX,
-        location.y + offsets.offsetY,
-        fish.fish.colorPalette,
-        ctx
-      );
-    });
+  var ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(backgroundImage, 0, 0, constants.canvasWidth, constants.canvasHeight);
 
-    requestAnimFrame(animateScreen);
-  }
+  fishes.forEach(fish => {
+    const location = getFishLocation(fish.id);
+    const offsets = getSwayOffsets(fish.id);
+    drawRenderedFish(
+      fish.canvas,
+      location.x + offsets.offsetX,
+      location.y + offsets.offsetY,
+      fish.fish.colorPalette,
+      ctx
+    );
+  });
 
-  function updateScreenElements() {
-    let backgroundImageName;
-    const currentMode = getState().currentMode;
-    if (currentMode === Modes.Training) {
-      backgroundImageName = "classroom";
-    } else if (currentMode === Modes.Predicting) {
-      backgroundImageName = "pipes";
-    } else if (currentMode === Modes.Pond) {
-      backgroundImageName = "underwater";
-    }
-
-    if (currentBackgroundImageName !== backgroundImageName) {
-      backgroundImage = new Image();
-      backgroundImage.src = `images/${backgroundImageName}-background.png`;
-      currentBackgroundImageName = backgroundImageName;
-    }
-  }
+  drawOverlays();
 
   requestAnimFrame(animateScreen);
-};
+}
+
+function updateScreenElements() {
+  let backgroundImageName;
+  const currentMode = getState().currentMode;
+  if (currentMode === Modes.Training) {
+    backgroundImageName = "classroom";
+  } else if (currentMode === Modes.Predicting) {
+    backgroundImageName = "pipes";
+  } else if (currentMode === Modes.Pond) {
+    backgroundImageName = "underwater";
+  }
+
+  if (currentBackgroundImageName !== backgroundImageName) {
+    backgroundImage = new Image();
+    backgroundImage.src = `images/${backgroundImageName}-background.png`;
+    currentBackgroundImageName = backgroundImageName;
+    currentModeStartTime = $time();
+  }
+}
+
+function drawOverlays() {
+  // update fade
+  var duration = $time() - currentModeStartTime;
+  var amount = 1 - (duration / 800);
+  if (amount < 0) {
+    amount = 0;
+  }
+  DrawFade(amount, "#000");
+}
+
+function DrawFade(amount, overlayColour)
+{
+  if (amount == 0) {
+    return;
+  }
+
+  console.log(amount);
+
+  canvasCtx.globalAlpha = amount;
+  canvasCtx.fillStyle = overlayColour;
+  DrawFilledRect(0, 0, constants.canvasWidth, constants.canvasHeight);
+  canvasCtx.globalAlpha = 1;
+}
+
+function DrawFilledRect(x, y, w, h)
+{
+  x = Math.floor(x / 1);
+  y = Math.floor(y / 1);
+  w = Math.floor(w / 1);
+  h = Math.floor(h / 1);
+
+  canvasCtx.fillRect(x, y, w, h);
+}
+
+
