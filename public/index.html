@@ -11,34 +11,73 @@
       crossorigin="anonymous"
     />
     <style>
+      #header {
+        width: 100%;
+        height: 80px;
+      }
       #container {
         position: relative;
+        width: 100vw;
+        height: 56.25vw; /* height:width ratio = 9/16 = .5625  */
+        max-height: 100vh;
+        max-width: 177.78vh; /* 16/9 = 1.778 */
       }
       #ui {
         position: absolute;
         top: 0;
         left: 0;
-        width: 1024px;
-        height: 576px;
+        width: 100vw;
+        height: 56.25vw; /* height:width ratio = 9/16 = .5625  */
+        max-height: 100vh;
+        max-width: 177.78vh; /* 16/9 = 1.778 */
+      }
+      #activity-canvas {
+        width: 100%;
       }
 
-      button {
-        background-color: #aaf;
-        color: white;
-        font-size: 40px;
-        border-radius: 10px;
-        padding: 20px;
+      @media screen and (max-aspect-ratio:16/9) {
+        button {
+          background-color: #aaf;
+          color: white;
+          font-size: 3vw;
+          border-radius: 3vw;
+          padding: 1vw;
+          border: none;
+          width: 20vw;
+          height: 10vw;
+        }
+
+        #test-button {
+          position: absolute;
+          right: 4vw;
+          bottom: 4vw;
+        }
       }
 
-      #test-button {
-        position: absolute;
-        right: 20px;
-        bottom: 20px;
+      @media screen and (min-aspect-ratio:16/9) {
+        button {
+          background-color: #aaf;
+          color: white;
+          font-size: calc(3vh * 16/9);
+          border-radius: calc(3vh * 16/9);
+          padding: calc(1vh * 16/9);
+          border: none;
+          width: calc(20vh * 16/9);
+          height: calc(10vh * 16/9);
+        }
+
+        #test-button {
+          position: absolute;
+          right: calc(4vh * 16/9);
+          bottom: calc(4vh * 16/9);
+        }
       }
+
     </style>
   </head>
 
   <body>
+    <div id="header"></div>
     <div id="ml-activities"></div>
     <div id="container">
       <canvas id="activity-canvas"></canvas>
