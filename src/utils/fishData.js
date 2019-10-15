@@ -177,7 +177,13 @@ const fish = {
       src: 'images/fish/bethanyfish/Dorsal_Fin_Wave_bethany.png',
       knnData: [16, 15, 0],
       type: FishBodyPart.DORSAL_FIN
-    },/*
+    },
+    topFin2: {
+      src: 'images/fish/bethanyfish/anglerfish.png',
+      knnData: [16, 15, 0],
+      type: FishBodyPart.DORSAL_FIN
+    },
+    /*
     topFin2: {
       src: 'images/fish/dorsalFin/Dorsal_Fin_Mohawk.png',
       knnData: [20, 26, 1],
