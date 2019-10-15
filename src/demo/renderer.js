@@ -33,10 +33,10 @@ let fishes = [],
 
 const FISH_CANVAS_WIDTH = 300;
 const FISH_CANVAS_HEIGHT = 200;
-const FISH_WIDTH = 150;
-const FISH_HEIGHT = 100;
+const FISH_WIDTH = 300;
+const FISH_HEIGHT = 200;
 
-const ROWS = 5;
+const ROWS = 4;
 const COLS = 4;
 
 function getSwayOffsets(fishId) {
@@ -105,7 +105,14 @@ function drawFish(fish, results, palette, ctx) {
     let intermediateCtx = intermediateCanvas.getContext('2d');
     let anchor = [0, 0];
     if (result.fishPart.type !== FishBodyPart.BODY) {
-      anchor = bodyAnchorFromType(body, result.fishPart.type);
+      const bodyAnchor = bodyAnchorFromType(body, result.fishPart.type);
+      anchor[0] = bodyAnchor[0];
+      anchor[1] = bodyAnchor[1];
+    }
+    if (result.fishPart.type === FishBodyPart.MOUTH || result.fishPart.type === FishBodyPart.EYE) {
+      console.log(result.fishPart, anchor);
+      anchor[0] -= result.img.width;
+      console.log(result.img.width, anchor);
     }
 
     const xPos = bodyAnchor[0] + anchor[0];
@@ -161,12 +168,14 @@ function bodyAnchorFromType(body, type) {
       return body.mouthAnchor;
     case FishBodyPart.DORSAL_FIN:
       return body.dorsalFinAnchor;
-    case FishBodyPart.PECTORAL_FIN:
-      return body.pectoralFinAnchor;
     case FishBodyPart.TAIL:
       return body.tailAnchor;
     case FishBodyPart.BODY:
       return body.anchor;
+    case FishBodyPart.PECTORAL_FIN_FRONT:
+      return body.frontPectoralFinAnchor;
+    case FishBodyPart.PECTORAL_FIN_BACK:
+      return body.backPectoralFinAnchor;
     default:
       return [0, 0];
   }
@@ -177,7 +186,8 @@ function colorFromType(palette, type) {
     case FishBodyPart.MOUTH:
       return palette.mouthRgb;
     case FishBodyPart.DORSAL_FIN:
-    case FishBodyPart.PECTORAL_FIN:
+    case FishBodyPart.PECTORAL_FIN_FRONT:
+    case FishBodyPart.PECTORAL_FIN_BACK:
     case FishBodyPart.TAIL:
       return palette.finRgb;
     case FishBodyPart.BODY:
