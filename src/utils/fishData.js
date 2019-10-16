@@ -8,7 +8,7 @@ const normalizeColorComponent = colorcomp => {
 // is ordered by its render dependency (i.e., dorsalFin should be rendered
 // before body).
 export const FishBodyPart = Object.freeze({
-  DORSAL_FIN: 0,
+  DORSAL_FIN: 6,
   TAIL: 1,
   BODY: 2,
   MOUTH: 3,
@@ -20,191 +20,121 @@ const fish = {
   // BODY KNN DATA: [height:width ratio]
   bodies: {
     body1: {
-      src: 'images/fish/body/Body_BrushTip.png',
+      src: 'images/fish/body/brendan1.png',
       anchor: [90, 65],
-      eyeAnchor: [72, 17],
-      mouthAnchor: [115, 30],
+      eyeAnchor: [52, 17],
+      mouthAnchor: [80, 15],
       pectoralFinAnchor: [40, 65],
-      dorsalFinAnchor: [30, -20],
+      dorsalFinAnchor: [30, -45],
       tailAnchor: [-25, 20],
-      knnData: [0.37],
+      knnData: [0],
       type: FishBodyPart.BODY
     },
     body2: {
-      src: 'images/fish/body/Body_EyeShape.png',
-      anchor: [80, 30],
-      eyeAnchor: [90, 40],
-      mouthAnchor: [125, 55],
-      pectoralFinAnchor: [60, 89],
-      dorsalFinAnchor: [35, 15],
-      tailAnchor: [-25, 45],
-      knnData: [0.0],
+      src: 'images/fish/body/brendan2.png',
+      anchor: [90, 65],
+      eyeAnchor: [52, 17],
+      mouthAnchor: [80, 15],
+      pectoralFinAnchor: [40, 65],
+      dorsalFinAnchor: [30, -45],
+      tailAnchor: [-25, 20],
+      knnData: [0],
       type: FishBodyPart.BODY
     },
     body3: {
-      src: 'images/fish/body/Body_Round.png',
-      anchor: [100, 50],
-      eyeAnchor: [60, 25],
-      mouthAnchor: [95, 40],
-      pectoralFinAnchor: [30, 75],
-      dorsalFinAnchor: [17, -15],
-      tailAnchor: [-25, 30],
-      knnData: [1.0],
-      type: FishBodyPart.BODY
-    },
-    body4: {
-      src: 'images/fish/body/Body_RoundedSquare.png',
-      anchor: [100, 50],
-      eyeAnchor: [65, 26],
-      mouthAnchor: [90, 61],
-      pectoralFinAnchor: [23, 80],
-      dorsalFinAnchor: [13, -19],
-      tailAnchor: [-30, 50],
-      knnData: [0.82],
+      src: 'images/fish/body/brendan3.png',
+      anchor: [90, 65],
+      eyeAnchor: [52, 17],
+      mouthAnchor: [80, 15],
+      pectoralFinAnchor: [40, 65],
+      dorsalFinAnchor: [30, -45],
+      tailAnchor: [-25, 20],
+      knnData: [0],
       type: FishBodyPart.BODY
     }
   },
   // EYE KNN DATA: [eye area, pupil:eye area ratio]
   eyes: {
     eye1: {
-      src: 'images/fish/eyes/Eye.png',
-      knnData: [1, 0.07],
+      src: 'images/fish/eyes/brendan1.png',
+      knnData: [0],
       type: FishBodyPart.EYE
     },
     eye2: {
-      src: 'images/fish/eyes/Eye_Round.png',
-      knnData: [0.55, 0.42],
+      src: 'images/fish/eyes/brendan2.png',
+      knnData: [0],
+      type: FishBodyPart.EYE
+    },
+    eye3: {
+      src: 'images/fish/eyes/brendan3.png',
+      knnData: [0],
+      type: FishBodyPart.EYE
+    },
+    eye4: {
+      src: 'images/fish/eyes/brendan4.png',
+      knnData: [0],
       type: FishBodyPart.EYE
     }
   },
   // MOUTH KNN DATA: [hasTeeth (0/1 bool), ratio of height:wifth]
   mouths: {
     mouth1: {
-      src: 'images/fish/mouth/Mouth_RoundedHeart.png',
-      knnData: [0, 0.46],
+      src: 'images/fish/mouth/brendan1.png',
+      knnData: [1],
       type: FishBodyPart.MOUTH
     },
     mouth2: {
-      src: 'images/fish/mouth/Mouth_CurvedCylinder.png',
-      knnData: [0, 1],
-      type: FishBodyPart.MOUTH
-    },
-    mouth3: {
-      src: 'images/fish/mouth/Mouth_Heart.png',
-      knnData: [0, 0.25],
-      type: FishBodyPart.MOUTH
-    },
-    mouth4: {
-      src: 'images/fish/mouth/Mouth_DuckLips.png',
-      knnData: [0, 0.08],
+      src: 'images/fish/mouth/brendan2.png',
+      knnData: [1],
       type: FishBodyPart.MOUTH
     }
-    // TODO: fix shark mouth transform
-    // mouth5: {
-    //   src: 'images/fish/mouth/Mouth_Shark.png',
-    //   knnData: [1,0.56],
-    //   type: FishBodyPart.MOUTH
-    // }
   },
   // SIDE FIN KNN DATA: [pointiness rank]
   sideFins: {
     sideFin1: {
-      src: 'images/fish/pectoralFin/Pectoral_Fin_Standard.png',
-      knnData: [0.2],
-      type: FishBodyPart.PECTORAL_FIN
-    },
-    sideFin2: {
-      src: 'images/fish/pectoralFin/Pectoral_Fin_Drop.png',
-      knnData: [0.4],
-      type: FishBodyPart.PECTORAL_FIN
-    },
-    sideFin3: {
-      src: 'images/fish/pectoralFin/Pectoral_Fin_Almond.png',
-      knnData: [0.8],
-      type: FishBodyPart.PECTORAL_FIN
-    },
-    // This fin needs to be on the body as opposed to coming off the body so it will
-    // need different anchor points on the body itself.
-    sideFin4: {
-      src: 'images/fish/pectoralFin/Pectoral_Fin_Bean.png',
+      src: 'images/fish/pectoralFin/brendan1.png',
       knnData: [0],
       type: FishBodyPart.PECTORAL_FIN
     },
-    sideFin5: {
-      src: 'images/fish/pectoralFin/Pectoral_Fin_RoundTriangle.png',
-      knnData: [0.6],
-      type: FishBodyPart.PECTORAL_FIN
-    },
-    sideFin6: {
-      src: 'images/fish/pectoralFin/Pectoral_Fin_Sharp.png',
-      knnData: [1],
+    sideFin2: {
+      src: 'images/fish/pectoralFin/brendan2.png',
+      knnData: [0],
       type: FishBodyPart.PECTORAL_FIN
     }
   },
   // TOP FIN KNN DATA: [pointiness rank]
   topFins: {
     topFin1: {
-      src: 'images/fish/dorsalFin/Dorsal_Fin_Oval.png',
+      src: 'images/fish/dorsalFin/brendan1.png',
       knnData: [0],
       type: FishBodyPart.DORSAL_FIN
     },
     topFin2: {
-      src: 'images/fish/dorsalFin/Dorsal_Fin_Mohawk.png',
-      knnData: [0.5],
+      src: 'images/fish/dorsalFin/brendan2.png',
+      knnData: [0],
       type: FishBodyPart.DORSAL_FIN
     },
     topFin3: {
-      src: 'images/fish/dorsalFin/Dorsal_Fin_Almond.png',
-      knnData: [1],
+      src: 'images/fish/dorsalFin/brendan3.png',
+      knnData: [0],
       type: FishBodyPart.DORSAL_FIN
     },
-    // This fin spans the whole body so can only be used with the corresponding side fin
-    // topFin4: {
-    //   src: 'images/fish/dorsalFin/Dorsal_Fin_Bean.png',
-    //   knnData: [],
-    //   type: FishBodyPart.DORSAL_FIN
-    // },
-    topFin5: {
-      src: 'images/fish/dorsalFin/Dorsal_Fin_Wave.png',
-      knnData: [0.25],
+    topFin4: {
+      src: 'images/fish/dorsalFin/brendan4.png',
+      knnData: [0],
       type: FishBodyPart.DORSAL_FIN
     },
-    topFin6: {
-      src: 'images/fish/dorsalFin/Dorsal_Fin_Shark.png',
-      knnData: [0.75],
-      type: FishBodyPart.DORSAL_FIN
-    }
   },
   // TAIL KNN DATA: [sections, width]
   tails: {
     tail1: {
-      src: 'images/fish/tailFin/Tail_Fin_Clamshell.png',
-      knnData: [0.56],
-      type: FishBodyPart.TAIL
-    },
-    tail2: {
-      src: 'images/fish/tailFin/Tail_Fin_RoundedHeart.png',
-      knnData: [0.97],
-      type: FishBodyPart.TAIL
-    },
-    tail3: {
-      src: 'images/fish/tailFin/Tail_Fin_Almond.png',
-      knnData: [1],
-      type: FishBodyPart.TAIL
-    },
-    tail4: {
-      src: 'images/fish/tailFin/Tail_Fin_Bean.png',
-      knnData: [0.64],
-      type: FishBodyPart.TAIL
-    },
-    tail5: {
-      src: 'images/fish/tailFin/Tail_Fin_RoundedTriangle.png',
+      src: 'images/fish/tailFin/brendan1.png',
       knnData: [0],
       type: FishBodyPart.TAIL
     },
-    tail6: {
-      src: 'images/fish/tailFin/Tail_Fin_Sharp.png',
-      knnData: [0.57],
+    tail2: {
+      src: 'images/fish/tailFin/brendan2.png',
+      knnData: [0],
       type: FishBodyPart.TAIL
     }
   },
