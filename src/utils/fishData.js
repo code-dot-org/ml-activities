@@ -120,6 +120,11 @@ const fish = {
       src: 'images/fish/bethanyfish/Mouth_SharpTeeth.png',
       knnData: [0],
       type: FishBodyPart.MOUTH
+    },
+    mouth7: {
+      src: 'images/fish/bethanyfish/Lips.png',
+      knnData: [0],
+      type: FishBodyPart.MOUTH
     }
   },
   sideFinsFront: {
