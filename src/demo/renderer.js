@@ -189,8 +189,11 @@ function drawFish(fish, results, ctx, x = 0, y = 0) {
       anchor[0] = bodyAnchor[0];
       anchor[1] = bodyAnchor[1];
     }
-    if (result.fishPart.type === FishBodyPart.MOUTH || result.fishPart.type === FishBodyPart.EYE) {
+    if (result.fishPart.type === FishBodyPart.MOUTH || result.fishPart.type === FishBodyPart.EYE || result.fishPart.type === FishBodyPart.TAIL) {
       anchor[0] -= result.img.width;
+    }
+    if (result.fishPart.type === FishBodyPart.TAIL) {
+      anchor[1] -= result.img.height / 2;
     }
 
     const xPos = bodyAnchor[0] + anchor[0];
