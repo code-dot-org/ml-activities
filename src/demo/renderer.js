@@ -7,6 +7,8 @@ import {setState} from './state';
 const FISH_CANVAS_WIDTH = 300;
 const FISH_CANVAS_HEIGHT = 200;
 
+const canvasArray = new Array(25);
+
 // Initialize the renderer once.
 // This will generate canvases with the fish collection.
 export function init(canvas) {
@@ -17,6 +19,10 @@ export function init(canvas) {
     canvas,
     ctx: canvas.getContext('2d')
   });
+
+  for (var i = 0; i < 25; ++i) {
+    canvasArray[i] = {inUse: false, canvas: document.createElement('canvas')};
+  }
 
   switch (state.currentMode) {
     case Modes.Training:
@@ -318,10 +324,16 @@ function drawFish(fish, results, ctx, x = 0, y = 0) {
   results = _.orderBy(results, ['fishPart.type']);
 
   results.forEach(result => {
-    let intermediateCanvas = document.createElement('canvas');
+    //let intermediateCanvas = document.createElement('canvas');
+    let intermediateCanvasObject = canvasArray.find(
+      elem => elem.inUse === false
+    );
+      intermediateCanvasObject.inUse = true;
+    let intermediateCanvas = intermediateCanvasObject.canvas;
     intermediateCanvas.width = FISH_CANVAS_WIDTH;
     intermediateCanvas.height = FISH_CANVAS_HEIGHT;
     let intermediateCtx = intermediateCanvas.getContext('2d');
+    intermediateCtx.clearRect(0, 0, intermediateCanvas.width, intermediateCanvas.height);
     let anchor = [0, 0];
     if (result.fishPart.type !== FishBodyPart.BODY) {
       anchor = bodyAnchorFromType(body, result.fishPart.type);
@@ -360,6 +372,7 @@ function drawFish(fish, results, ctx, x = 0, y = 0) {
       FISH_CANVAS_WIDTH,
       FISH_CANVAS_HEIGHT
     );
+    intermediateCanvasObject.inUse = false;
   });
 }
 
