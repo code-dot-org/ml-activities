@@ -1,7 +1,22 @@
 import fish from './fishData';
-//const _ = require('lodash');
+const _ = require('lodash');
 
-export const generateRandomFish = () => {
+const getAllComponents = () => {
+  let allComponents = [];
+  Object.values(fish).forEach(compClass => {
+    Object.values(compClass).forEach(comp => {
+      allComponents.push(comp);
+    });
+  });
+  return allComponents;
+};
+
+const allComponents = getAllComponents();
+
+export const generateRandomFish = (trait = "") => {
+  const traitComp = _.shuffle(allComponents).find(comp =>
+    _.includes(comp.traits, trait)
+  );
   const bodies = Object.values(fish.bodies);
   const eyes = Object.values(fish.eyes);
   const mouths = Object.values(fish.mouths);
@@ -21,27 +36,32 @@ export const generateRandomFish = () => {
   const tail = tails[Math.floor(Math.random() * tails.length)];
   const colorPalette =
     colorPalettes[Math.floor(Math.random() * colorPalettes.length)];
-  const knnData = [
-    ...body.knnData,
-    ...eye.knnData,
-    ...mouth.knnData,
-    ...sideFinFront.knnData,
-    ...sideFinBack.knnData,
-    ...topFin.knnData,
-    ...tail.knnData,
-    ...colorPalette.knnData
-  ];
-
+  let parts = [body, eye, mouth, sideFinFront, sideFinBack, topFin, tail];
+  let knnData = [];
+  parts.forEach((part, idx) => {
+    if (traitComp && part.type === traitComp.type) {
+      parts[idx] = traitComp;
+    }
+    knnData = knnData.concat(part.knnData);
+  });
+  knnData = knnData.concat(colorPalette.knnData);
   return {
-    parts: [body, eye, mouth, sideFinFront, sideFinBack, topFin, tail],
+    parts,
     colorPalette,
     knnData
   };
 };
 
-export const generateOcean = numFish => {
+export const generateOcean = (numFish, traitProportions = {}) => {
   const ocean = [];
-  for (var i = 0; i < numFish; ++i) {
+  Object.keys(traitProportions).forEach(trait => {
+    const proportion = traitProportions[trait];
+    for (var i = 0; i < Math.round(proportion * numFish); ++ i) {
+    ocean.push(generateRandomFish(trait));
+    }
+  });
+  const numFishToFill = numFish - ocean.length;
+  for (var i = 0; i < numFishToFill; ++i) {
     ocean.push(generateRandomFish());
   }
   return ocean;

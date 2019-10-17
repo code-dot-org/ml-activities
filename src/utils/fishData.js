@@ -17,6 +17,8 @@ export const FishBodyPart = Object.freeze({
   EYE: 6
 });
 
+export const FishTraits = Object.freeze({ANGRY: "angry", SCARY: "scary"});
+
 const fish = {
   // BODY KNN DATA: [height:width ratio]
   bodies: {
@@ -30,6 +32,7 @@ const fish = {
       dorsalFinAnchor: [23, -15],
       tailAnchor: [107, 41],
       knnData: [0.6],
+      traits: [],
       type: FishBodyPart.BODY
     },
     eel: {
@@ -42,6 +45,7 @@ const fish = {
       dorsalFinAnchor: [53, -25],
       tailAnchor: [107, 67],
       knnData: [0],
+      traits: [],
       type: FishBodyPart.BODY
     },
     /*
@@ -55,6 +59,7 @@ const fish = {
       dorsalFinAnchor: [53, -25],
       tailAnchor: [107, 40],
       knnData: [0.2],
+      traits: [],
       type: FishBodyPart.BODY
     },*/
     round: {
@@ -67,6 +72,7 @@ const fish = {
       dorsalFinAnchor: [20, -18],
       tailAnchor: [97, 50],
       knnData: [1.0],
+      traits: [],
       type: FishBodyPart.BODY
     },
     roundedSquare: {
@@ -79,6 +85,7 @@ const fish = {
       dorsalFinAnchor: [33, -19],
       tailAnchor: [92, 47],
       knnData: [0.8],
+      traits: [],
       type: FishBodyPart.BODY
     },
     shark: {
@@ -91,6 +98,7 @@ const fish = {
       dorsalFinAnchor: [33, -23],
       tailAnchor: [139, 19],
       knnData: [0.4],
+      traits: [],
       type: FishBodyPart.BODY
     }
   },
@@ -99,26 +107,31 @@ const fish = {
     angry: {
       src: 'images/fish/eyes/Eyes_Angry.png',
       knnData: [1, 0.0],
+      traits: [FishTraits.ANGRY],
       type: FishBodyPart.EYE
     },
     big: {
       src: 'images/fish/eyes/Eyes_Big.png',
       knnData: [1, 0.75],
+      traits: [],
       type: FishBodyPart.EYE
     },
     concentric: {
       src: 'images/fish/eyes/Eyes_Concentric.png',
       knnData: [1, 1.00],
+      traits: [],
       type: FishBodyPart.EYE
     },
     side: {
       src: 'images/fish/eyes/Eyes_Side.png',
       knnData: [1, 0.5],
+      traits: [],
       type: FishBodyPart.EYE
     },
     unibrow: {
       src: 'images/fish/eyes/Eyes_Unibrow.png',
       knnData: [1, 0.25],
+      traits: [],
       type: FishBodyPart.EYE
     }
   },
@@ -127,46 +140,55 @@ const fish = {
     curvedCylinder: {
       src: 'images/fish/mouth/Mouth_CurvedCylinder.png',
       knnData: [0, 0.5],
+      traits: [],
       type: FishBodyPart.MOUTH
     },
     duckLips: {
       src: 'images/fish/mouth/Mouth_DuckLips.png',
       knnData: [0, 0.375],
+      traits: [],
       type: FishBodyPart.MOUTH
     },
     heart: {
       src: 'images/fish/mouth/Mouth_Heart.png',
       knnData: [0, 0.75],
+      traits: [],
       type: FishBodyPart.MOUTH
     },
     lips: {
       src: 'images/fish/mouth/Mouth_Lips.png',
       knnData: [0, 1.0],
+      traits: [],
       type: FishBodyPart.MOUTH
     },
     longMouth: {
       src: 'images/fish/mouth/Mouth_LongMouth.png',
       knnData: [0, 0.875],
+      traits: [],
       type: FishBodyPart.MOUTH
     },
     oval: {
       src: 'images/fish/mouth/Mouth_Oval.png',
       knnData: [0, 0.25],
+      traits: [],
       type: FishBodyPart.MOUTH
     },
     roundedHeart: {
       src: 'images/fish/mouth/Mouth_RoundedHeart.png',
       knnData: [0, 0.625],
+      traits: [],
       type: FishBodyPart.MOUTH
     },
     shark: {
       src: 'images/fish/mouth/Mouth_Shark.png',
       knnData: [1, 0.00],
+      traits: [FishTraits.SCARY],
       type: FishBodyPart.MOUTH
     },
     sharpTeeth: {
       src: 'images/fish/mouth/Mouth_SharpTeeth.png',
       knnData: [1, 0.125],
+      traits: [],
       type: FishBodyPart.MOUTH
     }
   },
@@ -175,26 +197,31 @@ const fish = {
     almond: {
       src: 'images/fish/pectoralFin/Pectoral_Fin_Almond.png',
       knnData: [0.8],
+      traits: [],
       type: FishBodyPart.PECTORAL_FIN_FRONT
     },
     drop: {
       src: 'images/fish/pectoralFin/Pectoral_Fin_Drop.png',
       knnData: [0.4],
+      traits: [],
       type: FishBodyPart.PECTORAL_FIN_FRONT
     },
     roundTriangle: {
       src: 'images/fish/pectoralFin/Pectoral_Fin_RoundTriangle.png',
       knnData: [0.6],
+      traits: [],
       type: FishBodyPart.PECTORAL_FIN_FRONT
     },
     sharp: {
       src: 'images/fish/pectoralFin/Pectoral_Fin_Sharp.png',
       knnData: [1],
+      traits: [],
       type: FishBodyPart.PECTORAL_FIN_FRONT
     },
     standard: {
       src: 'images/fish/pectoralFin/Pectoral_Fin_Standard.png',
       knnData: [0.2],
+      traits: [],
       type: FishBodyPart.PECTORAL_FIN_FRONT
     }
   },
@@ -202,26 +229,31 @@ const fish = {
     almond: {
       src: 'images/fish/pectoralFin/Pectoral_Fin_Almond.png',
       knnData: [0.8],
+      traits: [],
       type: FishBodyPart.PECTORAL_FIN_BACK
     },
     drop: {
       src: 'images/fish/pectoralFin/Pectoral_Fin_Drop.png',
       knnData: [0.4],
+      traits: [],
       type: FishBodyPart.PECTORAL_FIN_BACK
     },
     roundTriangle: {
       src: 'images/fish/pectoralFin/Pectoral_Fin_RoundTriangle.png',
       knnData: [0.6],
+      traits: [],
       type: FishBodyPart.PECTORAL_FIN_BACK
     },
     sharp: {
       src: 'images/fish/pectoralFin/Pectoral_Fin_Sharp.png',
       knnData: [1],
+      traits: [],
       type: FishBodyPart.PECTORAL_FIN_BACK
     },
     standard: {
       src: 'images/fish/pectoralFin/Pectoral_Fin_Standard.png',
       knnData: [0.2],
+      traits: [],
       type: FishBodyPart.PECTORAL_FIN_BACK
     }
   },
@@ -231,48 +263,57 @@ const fish = {
     almond: {
       src: 'images/fish/dorsalFin/Dorsal_Fin_Almond.png',
       knnData: [1],
+      traits: [],
       type: FishBodyPart.DORSAL_FIN
     },/*
     anglerfish: {
       src: 'images/fish/dorsalFin/Dorsal_Fin_anglerfish.png',
       knnData: [0.125],
+      traits: [],
       type: FishBodyPart.DORSAL_FIN
     },*/
     /*
     horns: {
       src: 'images/fish/dorsalFin/Dorsal_Fin_Horns.png',
       knnData: [0.625],
+      traits: [],
       type: FishBodyPart.DORSAL_FIN
     },
     */
     mohawk: {
       src: 'images/fish/dorsalFin/Dorsal_Fin_Mohawk.png',
       knnData: [0.5],
+      traits: [],
       type: FishBodyPart.DORSAL_FIN
     },
     oval: {
       src: 'images/fish/dorsalFin/Dorsal_Fin_Oval.png',
       knnData: [0],
+      traits: [],
       type: FishBodyPart.DORSAL_FIN
     },
     shark: {
       src: 'images/fish/dorsalFin/Dorsal_Fin_Shark.png',
       knnData: [0.875],
+      traits: [],
       type: FishBodyPart.DORSAL_FIN
     },
     spikes: {
       src: 'images/fish/dorsalFin/Dorsal_Fin_Spikes.png',
       knnData: [0.75],
+      traits: [],
       type: FishBodyPart.DORSAL_FIN
     },/*
     topHat: {
       src: 'images/fish/dorsalFin/Dorsal_Fin_TopHat.png',
       knnData: [0.25],
+      traits: [],
       type: FishBodyPart.DORSAL_FIN
     },*/
     wave: {
       src: 'images/fish/dorsalFin/Dorsal_Fin_Wave.png',
       knnData: [0.375],
+      traits: [],
       type: FishBodyPart.DORSAL_FIN
     }
   },
@@ -281,31 +322,37 @@ const fish = {
     almond: {
       src: 'images/fish/tailFin/Tail_Fin_Almond.png',
       knnData: [1],
+      traits: [],
       type: FishBodyPart.TAIL
     },
     bean: {
       src: 'images/fish/tailFin/Tail_Fin_Bean.png',
       knnData: [0.64],
+      traits: [],
       type: FishBodyPart.TAIL
     },
     clamshell: {
       src: 'images/fish/tailFin/Tail_Fin_Clamshell.png',
       knnData: [0.56],
+      traits: [],
       type: FishBodyPart.TAIL
     },
     roundedHeart: {
       src: 'images/fish/tailFin/Tail_Fin_RoundedHeart.png',
       knnData: [0.97],
+      traits: [],
       type: FishBodyPart.TAIL
     },
     roundedTriangle: {
       src: 'images/fish/tailFin/Tail_Fin_RoundedTriangle.png',
       knnData: [0],
+      traits: [],
       type: FishBodyPart.TAIL
     },
     sharp: {
       src: 'images/fish/tailFin/Tail_Fin_Sharp.png',
       knnData: [0.57],
+      traits: [],
       type: FishBodyPart.TAIL
     }
   },
@@ -322,7 +369,8 @@ const fish = {
         normalizeColorComponent(248),
         normalizeColorComponent(192),
         normalizeColorComponent(157)
-      ]
+      ],
+      traits: [],
     },
     palette2: {
       bodyRgb: [253, 192, 77],
@@ -335,7 +383,8 @@ const fish = {
         normalizeColorComponent(235),
         normalizeColorComponent(120),
         normalizeColorComponent(50)
-      ]
+      ],
+      traits: [],
     },
     palette3: {
       bodyRgb: [39, 116, 186],
@@ -348,7 +397,8 @@ const fish = {
         normalizeColorComponent(253),
         normalizeColorComponent(217),
         normalizeColorComponent(136)
-      ]
+      ],
+      traits: [],
     },
     palette4: {
       bodyRgb: [21, 52, 64],
@@ -361,7 +411,8 @@ const fish = {
         normalizeColorComponent(200),
         normalizeColorComponent(220),
         normalizeColorComponent(92)
-      ]
+      ],
+      traits: [],
     }
   }
 };
