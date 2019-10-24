@@ -19,7 +19,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/code-dot-org/dance-party.git"
+    "url": "git+ssh://git@github.com/code-dot-org/ml-activities.git"
   },
   "author": "",
   "license": "Apache-2.0",
