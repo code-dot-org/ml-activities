@@ -3,11 +3,17 @@ import {setState} from '../state';
 import {Modes} from '../constants';
 import {createButton, createImage, createText, toMode} from '../helpers';
 
+
+const onContinueClick = () => {
+  setState({word: 'test'});
+  toMode(Modes.TrainingIntro);
+}
+
 export const init = () => {
   const footerElements = [
     createButton({
       text: 'Continue',
-      onClick: () => toMode(Modes.Words),
+      onClick: onContinueClick,
       className: 'continue-end'
     })
   ];

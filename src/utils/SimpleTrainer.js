@@ -3,13 +3,15 @@ import * as tf from '@tensorflow/tfjs';
 import * as knnClassifier from '@tensorflow-models/knn-classifier';
 
 export default class SimpleTrainer {
+  constructor(useMobilenet = false) {
+    this.useMobilenet = useMobilenet;
+  }
+  
   async initializeClassifiers() {
     this.knn = knnClassifier.create();
+    if (this.useMobilenet) {
     this.mobilenet = await mobilenetModule.load();
-  }
-
-  initializeClassifiersWithoutMobilenet() {
-    this.knn = knnClassifier.create();
+    }
   }
 
   setTopK(k) {
@@ -62,6 +64,14 @@ export default class SimpleTrainer {
     image.dispose();
     if (logits) {
       logits.dispose();
+    }
+  }
+
+  addExample(example, classId) {
+    if (this.useMobilenet) {
+      this.addExampleImage(example, classId);
+    } else {
+      this.addExampleData(example,classId);
     }
   }
 

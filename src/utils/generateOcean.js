@@ -1,6 +1,14 @@
 import {fishData} from './fishData';
 
 export const generateRandomFish = id => {
+  if (Math.random() > 0.5) {
+    return {
+      id,
+      fish: false,
+      src: 'images/trash/plastic-water-bottle.jpg'
+    }
+  } else {
+
   const fish = fishData;
 
   const bodies = Object.values(fish.bodies);
@@ -34,10 +42,12 @@ export const generateRandomFish = id => {
 
   return {
     id,
+    fish: true,
     parts: [body, eye, mouth, sideFinFront, sideFinBack, topFin, tail],
     colorPalette,
     knnData
   };
+  }
 };
 
 export const generateOcean = numFish => {

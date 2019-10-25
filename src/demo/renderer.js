@@ -30,14 +30,18 @@ let lastPauseTime = 0;
 let lastStartTime;
 let defaultMoveTime = 1000;
 let moveTime;
+let trashImage;
 
 export const initRenderer = () => {
   canvasCache = new CanvasCache();
+  setState({canvasCache});
   intermediateCanvas = document.createElement('canvas');
   intermediateCtx = intermediateCanvas.getContext('2d');
   intermediateCanvas.width = constants.fishCanvasWidth;
   intermediateCanvas.height = constants.fishCanvasHeight;
 
+  trashImage = new Image();
+  trashImage.src = 'images/trash/plastic-water-bottle.jpg';
   return loadAllFishPartImages();
 };
 
@@ -237,8 +241,11 @@ const drawMovingFish = state => {
       offsetX,
       fish.result ? fish.result.predictedClassId : false
     );
-
-    drawSingleFish(fish, x, y, ctx);
+    if (fish.fish) {
+      drawSingleFish(fish, x, y, ctx);
+    } else {
+      drawImageFromSrc(fish, x, y, ctx);
+    }
 
     if (state.currentMode === Modes.Predicting) {
       if (fish.result) {
@@ -357,6 +364,25 @@ const drawSingleFish = (fish, fishXPos, fishYPos, ctx) => {
     );
   }
   ctx.drawImage(fishCanvas, fishXPos, fishYPos);
+};
+
+const drawImageFromSrc = (fish, fishXPos, fishYPos, ctx) => {
+  const [imgCanvas, hit] = canvasCache.getCanvas(fish.id);
+  if (!hit) {
+    imgCanvas.width = constants.fishCanvasWidth;
+    imgCanvas.height = constants.fishCanvasHeight;
+    const imgCtx = imgCanvas.getContext('2d');
+    /*const image = new Image();
+    image.src = fish.src;
+    image.onload = () => {
+      imgCtx.drawImage(image, 0, 0);
+    };
+*/
+    imgCtx.drawImage(trashImage, 0, 0);
+    ctx.drawImage(imgCanvas, fishXPos, fishYPos);
+  } else {
+    ctx.drawImage(imgCanvas, fishXPos, fishYPos);
+  }
 };
 
 // Renders a fish into a canvas from its constituent parts.

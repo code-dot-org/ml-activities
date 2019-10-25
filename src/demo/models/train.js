@@ -36,7 +36,7 @@ const footerElements = [
   })
 ];
 
-export const init = () => {
+export const init = async () => {
   const state = getState();
   let fishData = [...state.fishData];
   if (fishData.length === 0) {
@@ -45,8 +45,8 @@ export const init = () => {
 
   let trainer = state.trainer;
   if (!trainer) {
-    trainer = new SimpleTrainer();
-    trainer.initializeClassifiersWithoutMobilenet();
+    trainer = new SimpleTrainer(true);
+    trainer.initializeClassifiers();
   }
 
   setState({
@@ -81,7 +81,7 @@ const onClassifyFish = doesLike => {
 
   const knnData = state.fishData[state.trainingIndex].knnData;
   const classId = doesLike ? ClassType.Like : ClassType.Dislike;
-  state.trainer.addExampleData(knnData, classId);
+  state.trainer.addExample(state.canvasCache.get(state.fishData[state.trainingIndex].id), classId);
 
   let fishData = [...state.fishData];
   if (state.trainingIndex > state.fishData.length - 5) {
