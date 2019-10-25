@@ -63,6 +63,12 @@ export const createImage = ({id, src}) => {
   return imageEl;
 };
 
+export const getUrlParamValue = (key) => {
+  const href = window.location.href;
+  const url = new URL(href);
+  return url.searchParams.get(key);
+}
+
 export const bodyAnchorFromType = (body, type) => {
   switch (type) {
     case FishBodyPart.EYE:
