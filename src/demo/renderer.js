@@ -195,6 +195,7 @@ const drawMovingFish = state => {
     state.currentMode === Modes.Training
   );
   const t = lastPauseTime + runtime;
+
   const offsetX = getOffsetForTime(t, state.fishData.length);
   const maxScreenX =
     state.currentMode === Modes.Training
@@ -382,33 +383,33 @@ const renderFishFromParts = (fish, ctx, x = 0, y = 0) => {
     intermediateCtx.drawImage(img, xPos, yPos);
     const rgb = colorForFishPart(fish.colorPalette, part);
 
-    if (rgb) {
-      // Add some random tint to the RGB value.
-      const tintAmount = 20;
-      let newRgb = [];
-      newRgb[0] = clamp(rgb[0] + randomInt(-tintAmount, tintAmount), 0, 255);
-      newRgb[1] = clamp(rgb[1] + randomInt(-tintAmount, tintAmount), 0, 255);
-      newRgb[2] = clamp(rgb[2] + randomInt(-tintAmount, tintAmount), 0, 255);
-
-      let imageData = intermediateCtx.getImageData(
-        xPos,
-        yPos,
-        img.width,
-        img.height
-      );
-      let data = imageData.data;
-
-      for (let i = 0; i < data.length; i += 4) {
-        // Tint any visible pixels
-        if (data[i + 3] > 0) {
-          data[i] = newRgb[0];
-          data[i + 1] = newRgb[1];
-          data[i + 2] = newRgb[2];
-        }
-      }
-
-      intermediateCtx.putImageData(imageData, xPos, yPos);
-    }
+    // if (rgb) {
+    //   // Add some random tint to the RGB value.
+    //   const tintAmount = 20;
+    //   let newRgb = [];
+    //   newRgb[0] = clamp(rgb[0] + randomInt(-tintAmount, tintAmount), 0, 255);
+    //   newRgb[1] = clamp(rgb[1] + randomInt(-tintAmount, tintAmount), 0, 255);
+    //   newRgb[2] = clamp(rgb[2] + randomInt(-tintAmount, tintAmount), 0, 255);
+    //
+    //   let imageData = intermediateCtx.getImageData(
+    //     xPos,
+    //     yPos,
+    //     img.width,
+    //     img.height
+    //   );
+    //   let data = imageData.data;
+    //
+    //   for (let i = 0; i < data.length; i += 4) {
+    //     // Tint any visible pixels
+    //     if (data[i + 3] > 0) {
+    //       data[i] = newRgb[0];
+    //       data[i + 1] = newRgb[1];
+    //       data[i + 2] = newRgb[2];
+    //     }
+    //   }
+    //
+    //   intermediateCtx.putImageData(imageData, xPos, yPos);
+    // }
 
     ctx.drawImage(
       intermediateCanvas,
