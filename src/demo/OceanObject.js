@@ -17,6 +17,8 @@ let tmpCanvas;
 let intermediateCtx;
 let mobilenet;
 
+let turtleImage;
+
 // Load a single fish part image.
 const loadImage = data => {
   return new Promise((resolve, reject) => {
@@ -69,6 +71,9 @@ export const loadAllTrashImages = () => {
   const loadImagePromises = imagePaths.map((src, idx) => {
     return loadImage({src, idx});
   });
+  loadImage({src: 'images/trash/turtle-pdv-clipart.png'}).then(result => {
+    turtleImage = result.img;
+  });
   return Promise.all(loadImagePromises).then(results => {
     results.forEach(result => {
       trashImages[result.data.idx] = result.img;
@@ -76,8 +81,12 @@ export const loadAllTrashImages = () => {
   });
 };
 
-export const generateOceanObject = (allowedClasses, id) => {
+export const generateOceanObject = (allowedClasses, id, turtle=false) => {
   const idx = Math.floor(Math.random() * allowedClasses.length);
+  if (turtle && Math.random() < .1) {
+    const newOceanObject = new TurtleOceanObject();
+    return newOceanObject;
+  }
   const newOceanObject = new allowedClasses[idx](id);
   newOceanObject.randomize();
   return newOceanObject;
@@ -244,6 +253,31 @@ export class TrashOceanObject extends OceanObject {
   randomize() {
     const idx = Math.floor(Math.random() * imagePaths.length);
     this.image = trashImages[idx];
+  }
+  drawToCanvas(canvas) {
+    const ctx = canvas.getContext('2d');
+    //const xpos = constants.fishCanvasWidth / 2 - this.image.width / 2;
+    //const ypos = constants.fishCanvasHeight / 2 - this.image.height / 2;
+    const xpos = 0;
+    const ypos = 0;
+    ctx.drawImage(
+      this.image,
+      xpos,
+      ypos,
+      constants.fishCanvasWidth,
+      constants.fishCanvasHeight
+    );
+    this.generateLogits(canvas);
+  }
+}
+
+export class TurtleOceanObject extends OceanObject {
+  constructor(id) {
+    super(id);
+    this.image = turtleImage;
+  }
+  
+  randomize() {
   }
   drawToCanvas(canvas) {
     const ctx = canvas.getContext('2d');

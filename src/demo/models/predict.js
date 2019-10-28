@@ -3,6 +3,7 @@ import $ from 'jquery';
 import {setState} from '../state';
 import {Modes} from '../constants';
 import {createButton, createText, createImage, toMode} from '../helpers';
+import {generateOcean} from '../../utils/generateOcean';
 
 const headerElements = [createText({id: 'header', text: 'A.I. Sorting'})];
 const uiElements = [
@@ -38,7 +39,8 @@ const footerElements = [
 ];
 
 export const init = () => {
-  setState({headerElements, uiElements, footerElements, isRunning: true});
+  const fishData = generateOcean(100, true);
+  setState({fishData, headerElements, uiElements, footerElements, isRunning: true});
 };
 
 export const predictFish = (state, idx) => {
