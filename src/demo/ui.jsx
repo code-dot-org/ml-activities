@@ -343,7 +343,7 @@ class TrainingIntro extends React.Component {
 class Train extends React.Component {
   render() {
     const state = getState();
-    const questionText = `Is this fish ${state.word.toUpperCase()}?`;
+    const questionText = state.loadTrashImages ? 'Is this a fish?' : `Is this fish ${state.word.toUpperCase()}?`;
     const trainQuestionTextStyle = state.isRunning
       ? styles.trainQuestionTextDisabled
       : styles.trainQuestionText;
