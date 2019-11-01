@@ -1,4 +1,7 @@
 module.exports = {
+  node: {
+     fs: "empty"
+  },
   devtool: 'eval-cheap-module-source-map',
   resolve: {
     extensions: ['.js', '.jsx'],
