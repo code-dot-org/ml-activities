@@ -38,6 +38,11 @@ module.exports = {
       options: {
         limit: true, // everything
       }
-    }],
-  },
+    },
+    {
+      test: /\.wasm$/,
+      loader: 'wasm-loader-foo'
+    }
+    ],
+  }
 };
