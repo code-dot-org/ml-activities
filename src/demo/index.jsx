@@ -20,9 +20,11 @@ $(document).ready(() => {
   // Temporarily use URL parameter to set some state.
   const dataSet = queryStrFor('set') && queryStrFor('set').toLowerCase();
   const loadTrashImages = queryStrFor('mode') && queryStrFor('mode').toLowerCase() === 'fishvtrash';
+  const appMode = queryStrFor('mode');
 
   // Set initial state for UI elements.
   const state = setState({
+    appMode: appMode,
     currentMode: Modes.Loading,
     canvas,
     backgroundCanvas,
@@ -49,3 +51,4 @@ export const renderUI = () => {
   const renderElement = document.getElementById('container-react');
   ReactDOM.render(<UI />, renderElement);
 };
+
