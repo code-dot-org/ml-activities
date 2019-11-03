@@ -1,6 +1,7 @@
 const {initFishData, fishData, MouthExpression} = require('../../src/utils/fishData');
 const {generateOcean, filterOcean} = require('../../src/utils/generateOcean');
 const SimpleTrainer = require('../../src/utils/SimpleTrainer');
+const XGBoostTrainer = require('../../src/utils/XGBoostTrainer');
 
 
 const trial = async function(trainSize, testSize, trainer, labelFn) {
@@ -32,8 +33,10 @@ const average = function(list) {
 const performTrials = async function({numTrials, trainSize, testSize, trainer, labelFn}) {
   const trials = [];
   if (!trainer) {
-    trainer = new SimpleTrainer();
-    trainer.initializeClassifiersWithoutMobilenet();
+    //trainer = new SimpleTrainer();
+    //trainer.initializeClassifiersWithoutMobilenet();
+    trainer = new XGBoostTrainer();
+    await trainer.init();
   }
 
   //console.log(`${numTrials} trials`);
@@ -117,6 +120,7 @@ const PartKey = Object.freeze({
 });
 
 const NUM_TRIALS = 1;
+const TRAIN_SIZE = 100;
 
 describe('Model quality test', () => {
   beforeAll(() => {
@@ -125,7 +129,7 @@ describe('Model quality test', () => {
 
   test('Round fish quality test', async () => {
     const roundFishFn = (fish) => fish.body.knnData[1] === 0 ? 1 : 0;
-    const trainSize = 50;
+    const trainSize = TRAIN_SIZE;
 
     const result = await performTrials({numTrials: NUM_TRIALS, trainSize: trainSize, testSize: 100, labelFn: roundFishFn});
     analyzeConfusionMatrix(trainSize, result);
@@ -135,7 +139,7 @@ describe('Model quality test', () => {
   test('test eyes', async () => {
     const partData = fishData.eyes;
     const partKey = PartKey.EYE;
-    const trainSize = 50;
+    const trainSize = TRAIN_SIZE;
 
     for (const [name, data] of Object.entries(partData)) {
       console.log(name);
@@ -150,7 +154,7 @@ describe('Model quality test', () => {
   test('test mouths', async () => {
     const partData = fishData.mouths;
     const partKey = PartKey.MOUTH;    
-    const trainSize = 50;
+    const trainSize = TRAIN_SIZE;
 
     for (const [name, data] of Object.entries(partData)) {
       console.log(name);
@@ -165,7 +169,7 @@ describe('Model quality test', () => {
   test('test tails', async () => {
     const partData = fishData.tails;
     const partKey = PartKey.TAIL;
-    const trainSize = 50;
+    const trainSize = TRAIN_SIZE;
 
     for (const [name, data] of Object.entries(partData)) {
       console.log(name);
@@ -180,7 +184,7 @@ describe('Model quality test', () => {
   test('test mouth expressions', async () => {
     const partKey = PartKey.MOUTH;
     const knnDataIndex = 2;
-    const trainSize = 50;
+    const trainSize = TRAIN_SIZE;
 
     for (const [expressionName, expressionId] of Object.entries(MouthExpression)) {
       console.log(`${expressionName}`);
@@ -195,7 +199,7 @@ describe('Model quality test', () => {
   test('test shark teeth', async () => {
     const partData = fishData.mouths;
     const partKey = PartKey.MOUTH;
-    const trainSize = 50;
+    const trainSize = TRAIN_SIZE;
     const mouthNames = ['sharp1', 'spikey1'];
 
     const ids = Object.entries(partData).filter(entry => mouthNames.includes(entry[0])).map(entry => entry[1].index);
