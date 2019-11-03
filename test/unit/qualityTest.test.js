@@ -30,19 +30,20 @@ const average = function(list) {
   return (1.0 * sum / list.length);
 };
 
-const performTrials = async function({numTrials, trainSize, testSize, trainer, labelFn}) {
+const performTrials = async function({numTrials, trainSize, testSize, createTrainerFn, labelFn}) {
   const trials = [];
-  if (!trainer) {
-    //trainer = new SimpleTrainer();
-    //trainer.initializeClassifiersWithoutMobilenet();
-    trainer = new XGBoostTrainer();
-    await trainer.init();
+  if (!createTrainerFn) {
+    createTrainerFn = async () => {
+      const trainer = new XGBoostTrainer();
+      await trainer.init();
+      return trainer;
+    };
   }
 
   //console.log(`${numTrials} trials`);
   for (var i = 0; i < numTrials; i++) {
     //console.log(`Trial # ${i + 1}`);
-    trials.push(await trial(trainSize, testSize, trainer, labelFn));
+    trials.push(await trial(trainSize, testSize, await createTrainerFn(), labelFn));
   }
 
   const averagedConfusionMatrix = {};
@@ -119,7 +120,7 @@ const PartKey = Object.freeze({
   COLOR: 'colorPalette'
 });
 
-const NUM_TRIALS = 1;
+const NUM_TRIALS = 5;
 const TRAIN_SIZE = 100;
 
 describe('Model quality test', () => {
