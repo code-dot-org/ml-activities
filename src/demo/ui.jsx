@@ -1,11 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import Radium from 'radium';
 import _ from 'lodash';
 import {getState, setState} from './state';
 import {Modes, DataSet} from './constants';
 import {getAppMode} from './helpers';
 import {toMode} from './toMode';
-import {init as initModel} from './models';
 import {onClassifyFish} from './models/train';
 import colors from './colors';
 import aiBotClosed from '../../public/images/ai-bot-closed.png';
@@ -23,13 +23,6 @@ const styles = {
     fontSize: 48,
     lineHeight: '52px'
   },
-  footer: {
-    position: 'absolute',
-    bottom: 0,
-    width: '100%',
-    display: 'flex',
-    justifyContent: 'space-between'
-  },
   body: {
     position: 'relative',
     width: '100%',
@@ -46,17 +39,18 @@ const styles = {
     backgroundColor: colors.white,
     fontSize: '120%',
     borderRadius: 8,
-    border: `2px solid ${colors.black}`,
     minWidth: 160,
     padding: '16px 30px',
+    outline: 'none',
+    border: 'none',
     ':focus': {
       outline: `${colors.white} auto 5px`
     }
   },
   continueButton: {
-    marginLeft: 'auto',
-    marginRight: 10,
-    marginBottom: 10
+    position: 'absolute',
+    bottom: 10,
+    right: 10
   },
   button1col: {
     width: '20%',
@@ -140,12 +134,20 @@ const styles = {
   trainButtonYes: {
     position: 'absolute',
     top: '80%',
-    left: '33%'
+    left: '50%',
+    ':hover': {
+      backgroundColor: colors.green,
+      color: colors.white
+    }
   },
   trainButtonNo: {
     position: 'absolute',
     top: '80%',
-    left: '50%'
+    left: '33%',
+    ':hover': {
+      backgroundColor: colors.red,
+      color: colors.white
+    }
   },
   trainBot: {
     position: 'absolute',
@@ -171,7 +173,7 @@ const styles = {
     backgroundColor: colors.transparentBlack,
     padding: '2%',
     borderRadius: 10,
-    color: colors.white,
+    color: colors.white
   },
   pondBot: {
     position: 'absolute',
@@ -250,17 +252,7 @@ class Content extends React.Component {
   }
 }
 
-class Footer extends React.Component {
-  static propTypes = {
-    children: PropTypes.node
-  };
-
-  render() {
-    return <div style={styles.footer}>{this.props.children}</div>;
-  }
-}
-
-class Button extends React.Component {
+let Button = class Button extends React.Component {
   static propTypes = {
     style: PropTypes.object,
     children: PropTypes.node,
@@ -271,14 +263,15 @@ class Button extends React.Component {
     return (
       <button
         type="button"
-        style={{...this.props.style, ...styles.button}}
+        style={[styles.button, this.props.style]}
         onClick={this.props.onClick}
       >
         {this.props.children}
       </button>
     );
   }
-}
+};
+Button = Radium(Button);
 
 const instructionsText = {
   intro: [
@@ -348,7 +341,7 @@ class Instructions extends React.Component {
   render() {
     const state = getState();
     const currentPage = state.currentInstructionsPage;
-    const [,appModeVariant] = getAppMode(state);
+    const [, appModeVariant] = getAppMode(state);
 
     return (
       <Body>
@@ -383,17 +376,15 @@ class Instructions extends React.Component {
             })}
           </div>
         )}
-        <Footer>
-          <Button style={styles.continueButton} onClick={() => {}}>
-            Continue
-          </Button>
-        </Footer>
+        <Button style={styles.continueButton} onClick={() => {}}>
+          Continue
+        </Button>
       </Body>
     );
   }
 }
 
-class Pill extends React.Component {
+let Pill = class Pill extends React.Component {
   static propTypes = {
     text: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     icon: PropTypes.string,
@@ -408,15 +399,16 @@ class Pill extends React.Component {
     iconStyle.backgroundColor = iconBgColor || colors.white;
 
     return (
-      <div style={{...styles.pill, ...(this.props.style || {})}}>
+      <div style={[styles.pill, this.props.style]}>
         {icon && <img src={icon} style={iconStyle} />}
         <div style={styles.pillText}>{text}</div>
       </div>
     );
   }
-}
+};
+Pill = Radium(Pill);
 
-class SpeechBubble extends React.Component {
+let SpeechBubble = class SpeechBubble extends React.Component {
   static propTypes = {
     text: PropTypes.string.isRequired,
     style: PropTypes.object
@@ -424,49 +416,11 @@ class SpeechBubble extends React.Component {
 
   render() {
     return (
-      <div style={{...styles.bubble, ...(this.props.style || {})}}>
-        {this.props.text}
-      </div>
+      <div style={[styles.bubble, this.props.style]}>{this.props.text}</div>
     );
   }
-}
-
-class ActivityIntro extends React.Component {
-  render() {
-    return (
-      <div>
-        <Body>
-          <Header>Meet A.I.</Header>
-          <div style={styles.activityIntroText}>
-            Machine learning and Artificial Intelligence (AI) can give
-            recommendations, like when a computer suggests videos to watch or
-            products to buy. What else can we teach a computer?
-            <br />
-            <br />
-            Next, you’re going to teach A.I. a new word just by showing examples
-            of that type of fish.
-          </div>
-          <img style={styles.activityIntroBot} src={aiBotClosed} />
-          <Footer>
-            <Button
-              style={styles.continueButton}
-              onClick={() => {
-                const state = getState();
-                if (state.loadTrashImages) {
-                  setState({currentMode: Modes.TrainingIntro, word: 'FISHY'});
-                } else {
-                  toMode(Modes.Words);
-                }
-              }}
-            >
-              Continue
-            </Button>
-          </Footer>
-        </Body>
-      </div>
-    );
-  }
-}
+};
+SpeechBubble = Radium(SpeechBubble);
 
 const wordChoices = [
   ['Blue', 'Green', 'Red', 'Round', 'Square'],
@@ -508,11 +462,12 @@ class Words extends React.Component {
   }
 
   onChangeWord(itemIndex) {
-    const state = setState({
-      word: this.currentItems()[itemIndex],
-      currentMode: Modes.TrainingIntro
+    const word = this.currentItems()[itemIndex];
+    setState({
+      word,
+      trainingQuestion: `Is this fish ${word.toUpperCase()}?`
     });
-    initModel(state);
+    toMode(Modes.Training);
   }
 
   render() {
@@ -543,32 +498,7 @@ class Words extends React.Component {
   }
 }
 
-class TrainingIntro extends React.Component {
-  render() {
-    const state = getState();
-
-    return (
-      <Body>
-        <Header />
-        <div style={styles.activityIntroText}>
-          Now let's teach A.I. what <b>{state.word.toUpperCase()}</b> fish look
-          like.
-        </div>
-        <img style={styles.trainingIntroBot} src={aiBotClosed} />
-        <Footer>
-          <Button
-            style={styles.continueButton}
-            onClick={() => toMode(Modes.Training)}
-          >
-            Continue
-          </Button>
-        </Footer>
-      </Body>
-    );
-  }
-}
-
-class Train extends React.Component {
+let Train = class Train extends React.Component {
   renderSpeechBubble = state => {
     const total = state.yesCount + state.noCount;
     let text = '';
@@ -586,7 +516,6 @@ class Train extends React.Component {
 
   render() {
     const state = getState();
-    const questionText = `Is this fish ${state.word.toUpperCase()}?`;
     const trainQuestionTextStyle = state.isRunning
       ? styles.trainQuestionTextDisabled
       : styles.trainQuestionText;
@@ -594,20 +523,20 @@ class Train extends React.Component {
     return (
       <Body>
         <Header>A.I. Training</Header>
-        <div style={trainQuestionTextStyle}>{questionText}</div>
+        <div style={trainQuestionTextStyle}>{state.trainingQuestion}</div>
         <img style={styles.trainBot} src={aiBotClosed} />
         {this.renderSpeechBubble(state)}
         <Pill
           text={state.noCount}
           icon={xIcon}
           iconBgColor={colors.red}
-          style={{...styles.count, ...styles.noCount}}
+          style={[styles.count, styles.noCount]}
         />
         <Pill
           text={state.yesCount}
           icon={checkmarkIcon}
           iconBgColor={colors.green}
-          style={{...styles.count, ...styles.yesCount}}
+          style={[styles.count, styles.yesCount]}
         />
         <Button
           style={styles.trainButtonNo}
@@ -621,18 +550,17 @@ class Train extends React.Component {
         >
           {state.word}
         </Button>
-        <Footer>
-          <Button
-            style={styles.continueButton}
-            onClick={() => toMode(Modes.Predicting)}
-          >
-            Continue
-          </Button>
-        </Footer>
+        <Button
+          style={styles.continueButton}
+          onClick={() => toMode(Modes.Predicting)}
+        >
+          Continue
+        </Button>
       </Body>
     );
   }
-}
+};
+Train = Radium(Train);
 
 class Predict extends React.Component {
   render() {
@@ -642,16 +570,14 @@ class Predict extends React.Component {
       <Body>
         <Header>A.I. Sorting</Header>
         <img style={styles.predictBot} src={aiBotClosed} />
-        <Footer>
-          {state.canSkipPredict && (
-            <Button
-              style={styles.continueButton}
-              onClick={() => toMode(Modes.Pond)}
-            >
-              Skip
-            </Button>
-          )}
-        </Footer>
+        {state.canSkipPredict && (
+          <Button
+            style={styles.continueButton}
+            onClick={() => toMode(Modes.Pond)}
+          >
+            Skip
+          </Button>
+        )}
       </Body>
     );
   }
@@ -683,9 +609,7 @@ export default class UI extends React.Component {
     return (
       <div>
         {currentMode === Modes.Instructions && <Instructions />}
-        {currentMode === Modes.ActivityIntro && <ActivityIntro />}
         {currentMode === Modes.Words && <Words />}
-        {currentMode === Modes.TrainingIntro && <TrainingIntro />}
         {currentMode === Modes.Training && <Train />}
         {currentMode === Modes.Predicting && <Predict />}
         {currentMode === Modes.Pond && <Pond />}
