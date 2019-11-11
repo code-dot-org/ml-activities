@@ -9,6 +9,7 @@ import {
   clamp
 } from './helpers';
 import {trashImagePaths, seaCreatureImagePaths} from '../utils/imagePaths';
+import MobilenetWorker from "worker-loader!../utils/MobilenetWorker.js";
 
 let fishPartImages = {};
 let trashImages = [];
@@ -167,13 +168,36 @@ export class OceanObject {
   }
 
   async generateLogitsAsync(canvas) {
-    this.generateLogits(canvas);
+    const worker = new MobilenetWorker();
+    const imageData = canvas
+      .getContext('2d')
+      .getImageData(0, 0, canvas.width, canvas.height);
+    worker.mobilenet = mobilenet;
+    worker.postMessage(imageData.data);
+    worker.addEventListener('message', event => {
+      let tensorObj = {...event.data};
+      Object.keys(tensorObj).forEach(key => {
+        tensorObj[key] = tf.tensor(
+          Array.from(tensorObj[key].data),
+          tensorObj[key].shape
+        );
+      });
+      this.logits = tensorObj;
+      this.worker = null;
+    });
+    this.worker = worker;
   }
 
   // If using mobilenet, generate a tensor that represents the canvas
   generateLogits(canvas) {
     if (mobilenet && !this.logits) {
-      const image = tf.fromPixels(canvas);
+      if (this.worker) {
+        this.worker.terminate();
+        this.worker = null;
+      }
+      const image = tf.fromPixels(
+        canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height)
+      );
       const infer = () => mobilenet.infer(image, 'conv_preds');
       this.logits = infer();
     }
@@ -275,10 +299,10 @@ export class FishOceanObject extends OceanObject {
     const xPos = bodyAnchor[0] + anchor[0];
     const yPos = bodyAnchor[1] + anchor[1];
     if (part.type === FishBodyPart.PECTORAL_FIN_BACK) {
-          intermediateCtx.translate(xPos+img.width,yPos);
+      intermediateCtx.translate(xPos + img.width, yPos);
       intermediateCtx.scale(-1, 1);
-      intermediateCtx.drawImage(img, 0,0);
-      intermediateCtx.setTransform(1,0,0,1,0,0);
+      intermediateCtx.drawImage(img, 0, 0);
+      intermediateCtx.setTransform(1, 0, 0, 1, 0, 0);
     } else {
       intermediateCtx.drawImage(img, xPos, yPos);
     }
