@@ -321,7 +321,8 @@ export class FishOceanObject extends OceanObject {
     const ctx = fishCanvas.getContext('2d');
     ctx.translate(constants.fishCanvasWidth, 0);
     ctx.scale(-1, 1);
-    const bodyAnchor = bodyAnchorFromType(this.body, this.body.type);
+    let bodyAnchor = [...bodyAnchorFromType(this.body, this.body.type)];
+    bodyAnchor[0] = bodyAnchor[0] + 20;
 
     this.drawFishComponent(this.dorsalFin, bodyAnchor, ctx);
     this.drawFishComponent(this.tail, bodyAnchor, ctx);

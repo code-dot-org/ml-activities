@@ -18,6 +18,7 @@ import aiBotX from '../../public/images/ai-bot/ai-bot-x.png';
 import redScanner from '../../public/images/ai-bot/red-scanner.png';
 import greenScanner from '../../public/images/ai-bot/green-scanner.png';
 import blueScanner from '../../public/images/ai-bot/blue-scanner.png';
+import polaroidBG from '../../public/images/polaroidBG.png';
 
 var $time =
   Date.now ||
@@ -41,6 +42,7 @@ export const initRenderer = () => {
   canvasCache = new CanvasCache();
   let promises = [];
   promises.push(loadAllFishPartImages());
+  promises.push(loadAllBotImages());
   if (getState().loadTrashImages) {
     promises.push(loadAllTrashImages());
     promises.push(loadAllSeaCreatureImages());
@@ -71,7 +73,7 @@ export const render = () => {
     }
 
     if (state.currentMode === Modes.Predicting) {
-      loadAllBotImages();
+      //loadAllBotImages();
     }
   }
 
@@ -84,7 +86,7 @@ export const render = () => {
 
   switch (state.currentMode) {
     case Modes.Training:
-      drawFrame(state);
+      ////drawFrame(state);
       drawMovingFish(state);
       break;
     case Modes.Predicting:
@@ -162,7 +164,8 @@ const loadAllBotImages = async () => {
     likeBot: aiBotCheckmark,
     likeScanner: greenScanner,
     dislikeBot: aiBotX,
-    dislikeScanner: redScanner
+    dislikeScanner: redScanner,
+    trainingBackground: polaroidBG
   };
   let imagePromises = [];
 
@@ -258,6 +261,8 @@ const getYForFish = (numFish, fishIdx, state, offsetX, predictedClassId) => {
       (($time() * 360) / (20 * 1000) + (fishIdx + 1) * 10) % 360;
     const swayOffsetY = Math.sin(((swayValue * Math.PI) / 180) * 6) * 8;
     y += swayOffsetY;
+  } else if (state.currentMode === Modes.Training) {
+    y -= 50;
   }
 
   return y;
@@ -443,24 +448,46 @@ const drawPondFishImages = () => {
 // Used by drawMovingFish and drawPondFishImages.
 // Takes an optional size multipler, where 0.5 means fish are half size.
 const drawSingleFish = (fish, fishXPos, fishYPos, ctx, size = 1) => {
-  const [fishCanvas, hit] = canvasCache.getCanvas(fish.id);
+  const [fishPictureCanvas, hit] = canvasCache.getCanvas(
+    `fish-picture-${fish.id}`
+  );
   if (!hit) {
-    fishCanvas.width = constants.fishCanvasWidth;
-    fishCanvas.height = constants.fishCanvasHeight;
-    fish.drawToCanvas(fishCanvas);
+    if (getState().currentMode === Modes.Training) {
+      fishPictureCanvas.width = botImages.trainingBackground.width * 2;
+      fishPictureCanvas.height = botImages.trainingBackground.height * 2;
+      const [fishCanvas, hit] = canvasCache.getCanvas(`fish-${fish.id}`);
+      fishCanvas.width = 188;
+      fishCanvas.height = 190;
+      const fishPictureCtx = fishPictureCanvas.getContext('2d');
+      fishPictureCtx.drawImage(
+        botImages.trainingBackground,
+        0,
+        0,
+        fishPictureCanvas.width,
+        fishPictureCanvas.height
+      );
+      fish.drawToCanvas(fishCanvas);
+      fishPictureCtx.strokeStyle = '#FF0000';
+      fishPictureCtx.strokeRect(10, 10, 188, 190);
+      fishPictureCtx.drawImage(fishCanvas, 10, 10);
+    } else {
+      fishPictureCanvas.width = constants.fishCanvasWidth;
+      fishPictureCanvas.height = constants.fishCanvasHeight;
+      fish.drawToCanvas(fishPictureCanvas);
+    }
   }
 
   // TODO: Does scaling during drawImage have a performance impact on some
   // devices/browsers?  We migth need to pre-cache scaled images.
-  const width = fishCanvas.width * size;
-  const height = fishCanvas.height * size;
+  const width = fishPictureCanvas.width * size;
+  const height = fishPictureCanvas.height * size;
 
   // Maintain the center of the fish.
-  const adjustedFishXPos = fishXPos - width / 2 + fishCanvas.width / 2;
-  const adjustedFishYPos = fishYPos - height / 2 + fishCanvas.height / 2;
+  const adjustedFishXPos = fishXPos - width / 2 + fishPictureCanvas.width / 2;
+  const adjustedFishYPos = fishYPos - height / 2 + fishPictureCanvas.height / 2;
 
   ctx.drawImage(
-    fishCanvas,
+    fishPictureCanvas,
     Math.round(adjustedFishXPos),
     Math.round(adjustedFishYPos),
     width,
@@ -470,7 +497,9 @@ const drawSingleFish = (fish, fishXPos, fishYPos, ctx, size = 1) => {
 
 // Clear the sprite canvas.
 export const clearCanvas = canvas => {
-  canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#F0F0F0';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 };
 
 // Draw an overlay over the whole scene.  Used for fades.
