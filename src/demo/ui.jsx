@@ -108,7 +108,7 @@ const styles = {
   },
   trainButtons: {
     position: 'absolute',
-    top: '80%',
+    top: '85%',
     width: '100%',
     display: 'flex',
     justifyContent: 'center'
