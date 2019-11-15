@@ -37,6 +37,7 @@ let botImages = {};
 let botVelocity = 3;
 let botY, botYDestination;
 let currentPredictedClassId;
+let fishPictureCanvasWidth;
 
 export const initRenderer = () => {
   canvasCache = new CanvasCache();
@@ -68,12 +69,10 @@ export const render = () => {
 
     if (state.currentMode === Modes.Training) {
       moveTime = defaultMoveTime / 2;
+      fishPictureCanvasWidth = botImages.trainingBackground.width + 10;
     } else {
       moveTime = defaultMoveTime;
-    }
-
-    if (state.currentMode === Modes.Predicting) {
-      //loadAllBotImages();
+      fishPictureCanvasWidth = constants.fishCanvasWidth;
     }
   }
 
@@ -86,7 +85,6 @@ export const render = () => {
 
   switch (state.currentMode) {
     case Modes.Training:
-      ////drawFrame(state);
       drawMovingFish(state);
       break;
     case Modes.Predicting:
@@ -217,22 +215,22 @@ const getOffsetForTime = (t, totalFish) => {
   amount = amount - Math.sin(amount * 2 * Math.PI) / (2 * Math.PI);
 
   return (
-    constants.fishCanvasWidth * totalFish -
+    fishPictureCanvasWidth * totalFish -
     constants.canvasWidth / 2 +
-    constants.fishCanvasWidth / 2 -
-    Math.round(amount * constants.fishCanvasWidth)
+    fishPictureCanvasWidth / 2 -
+    Math.round(amount * fishPictureCanvasWidth)
   );
 };
 
 // Given X (screenX + offsetX), calculate the fish index at that X.
 const getFishIdxForLocation = (screenX, offsetX, totalFish) => {
-  const n = Math.floor((screenX + offsetX) / constants.fishCanvasWidth);
+  const n = Math.floor((screenX + offsetX) / fishPictureCanvasWidth);
   return totalFish - n;
 };
 
 // Calculate a given fish's X position.
 const getXForFish = (numFish, fishIdx, offsetX) => {
-  return (numFish - fishIdx) * constants.fishCanvasWidth - offsetX;
+  return (numFish - fishIdx) * fishPictureCanvasWidth - offsetX;
 };
 
 // Calculate a given fish's Y position.
@@ -453,11 +451,11 @@ const drawSingleFish = (fish, fishXPos, fishYPos, ctx, size = 1) => {
   );
   if (!hit) {
     if (getState().currentMode === Modes.Training) {
-      fishPictureCanvas.width = botImages.trainingBackground.width * 2;
-      fishPictureCanvas.height = botImages.trainingBackground.height * 2;
+      fishPictureCanvas.width = botImages.trainingBackground.width;
+      fishPictureCanvas.height = botImages.trainingBackground.height;
       const [fishCanvas, hit] = canvasCache.getCanvas(`fish-${fish.id}`);
-      fishCanvas.width = 188;
-      fishCanvas.height = 190;
+      fishCanvas.width = 350;
+      fishCanvas.height = 225;
       const fishPictureCtx = fishPictureCanvas.getContext('2d');
       fishPictureCtx.drawImage(
         botImages.trainingBackground,
@@ -467,9 +465,7 @@ const drawSingleFish = (fish, fishXPos, fishYPos, ctx, size = 1) => {
         fishPictureCanvas.height
       );
       fish.drawToCanvas(fishCanvas);
-      fishPictureCtx.strokeStyle = '#FF0000';
-      fishPictureCtx.strokeRect(10, 10, 188, 190);
-      fishPictureCtx.drawImage(fishCanvas, 10, 10);
+      fishPictureCtx.drawImage(fishCanvas, 15, 17);
     } else {
       fishPictureCanvas.width = constants.fishCanvasWidth;
       fishPictureCanvas.height = constants.fishCanvasHeight;
@@ -497,9 +493,7 @@ const drawSingleFish = (fish, fishXPos, fishYPos, ctx, size = 1) => {
 
 // Clear the sprite canvas.
 export const clearCanvas = canvas => {
-  const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#F0F0F0';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
 };
 
 // Draw an overlay over the whole scene.  Used for fades.

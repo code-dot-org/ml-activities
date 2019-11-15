@@ -1,7 +1,6 @@
 import * as mobilenetModule from '@tensorflow-models/mobilenet';
 import * as tf from '@tensorflow/tfjs';
 import {fishData, FishBodyPart} from '../utils/fishData';
-import constants from './constants';
 import {
   bodyAnchorFromType,
   colorForFishPart,
@@ -35,8 +34,6 @@ const loadImage = data => {
 export const loadAllFishPartImages = () => {
   intermediateCanvas = document.createElement('canvas');
   intermediateCtx = intermediateCanvas.getContext('2d');
-  intermediateCanvas.width = constants.fishCanvasWidth;
-  intermediateCanvas.height = constants.fishCanvasHeight;
   evaluationCanvas = document.createElement('canvas');
 
   let fishPartImagesToLoad = [];
@@ -246,8 +243,8 @@ export class FishOceanObject extends OceanObject {
     intermediateCtx.clearRect(
       0,
       0,
-      constants.fishCanvasWidth,
-      constants.fishCanvasHeight
+      intermediateCanvas.width,
+      intermediateCanvas.height
     );
 
     let anchor = [0, 0];
@@ -308,21 +305,18 @@ export class FishOceanObject extends OceanObject {
 
       intermediateCtx.putImageData(imageData, xPos, yPos);
     }
-    ctx.drawImage(
-      intermediateCanvas,
-      constants.fishCanvasWidth / 2 - intermediateCanvas.width / 2,
-      constants.fishCanvasHeight / 2 - intermediateCanvas.height / 2,
-      constants.fishCanvasWidth,
-      constants.fishCanvasHeight
-    );
+    ctx.drawImage(intermediateCanvas, 0, 0);
   }
 
   drawToCanvas(fishCanvas, generateLogits = true) {
     const ctx = fishCanvas.getContext('2d');
-    ctx.translate(constants.fishCanvasWidth, 0);
+    ctx.translate(fishCanvas.width, 0);
     ctx.scale(-1, 1);
     let bodyAnchor = [...bodyAnchorFromType(this.body, this.body.type)];
     bodyAnchor[0] = bodyAnchor[0] + 20;
+
+    intermediateCanvas.width = fishCanvas.width;
+    intermediateCanvas.height = fishCanvas.height;
 
     this.drawFishComponent(this.dorsalFin, bodyAnchor, ctx);
     this.drawFishComponent(this.tail, bodyAnchor, ctx);
