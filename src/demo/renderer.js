@@ -436,8 +436,8 @@ const drawSingleFish = (fish, fishXPos, fishYPos, ctx, size = 1) => {
       );
       const fishPictureCtx = fishPictureCanvas.getContext('2d');
       if (!fishCanvasHit) {
-        fishCanvas.width = 350;
-        fishCanvas.height = 225;
+        fishCanvas.width = constants.trainingFishCanvasWidth;
+        fishCanvas.height = constants.trainingFishCanvasHeight;
         fishPictureCtx.drawImage(
           botImages.trainingBackground,
           0,
