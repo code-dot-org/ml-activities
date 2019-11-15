@@ -381,23 +381,6 @@ const drawPredictBot = state => {
   ctx.drawImage(botImg, botX, botY);
 };
 
-// Draw frame in the center of the screen.
-const drawFrame = state => {
-  const canvas = state.canvas;
-  const size = constants.fishCanvasWidth;
-  const frameXPos = canvas.width / 2 - size / 2;
-  const frameYPos = canvas.height / 2 - size / 2;
-  drawRoundedFrame(
-    canvas.getContext('2d'),
-    frameXPos,
-    frameYPos,
-    size,
-    size,
-    '#F0F0F0',
-    '#F0F0F0'
-  );
-};
-
 // Draw the fish for pond mode.
 const drawPondFishImages = () => {
   const canvas = getState().canvas;
@@ -448,18 +431,22 @@ const drawSingleFish = (fish, fishXPos, fishYPos, ctx, size = 1) => {
     if (getState().currentMode === Modes.Training) {
       fishPictureCanvas.width = botImages.trainingBackground.width;
       fishPictureCanvas.height = botImages.trainingBackground.height;
-      const [fishCanvas, hit] = canvasCache.getCanvas(`fish-${fish.id}`);
-      fishCanvas.width = 350;
-      fishCanvas.height = 225;
-      const fishPictureCtx = fishPictureCanvas.getContext('2d');
-      fishPictureCtx.drawImage(
-        botImages.trainingBackground,
-        0,
-        0,
-        fishPictureCanvas.width,
-        fishPictureCanvas.height
+      const [fishCanvas, fishCanvasHit] = canvasCache.getCanvas(
+        `fish-${fish.id}`
       );
-      fish.drawToCanvas(fishCanvas);
+      const fishPictureCtx = fishPictureCanvas.getContext('2d');
+      if (!fishCanvasHit) {
+        fishCanvas.width = 350;
+        fishCanvas.height = 225;
+        fishPictureCtx.drawImage(
+          botImages.trainingBackground,
+          0,
+          0,
+          fishPictureCanvas.width,
+          fishPictureCanvas.height
+        );
+        fish.drawToCanvas(fishCanvas);
+      }
       fishPictureCtx.drawImage(fishCanvas, 15, 17);
     } else {
       fishPictureCanvas.width = constants.fishCanvasWidth;
@@ -513,43 +500,6 @@ function DrawFade(amount, overlayColour) {
   DrawFilledRect(0, 0, constants.canvasWidth, constants.canvasHeight);
   canvasCtx.globalAlpha = 1;
 }
-
-const drawRoundedFrame = (
-  ctx,
-  x,
-  y,
-  w,
-  h,
-  backgroundColor,
-  borderColor,
-  thickness = 2
-) => {
-  const r = 10;
-  ctx.lineJoin = 'round';
-  ctx.lineWidth = r;
-
-  // Outer frame
-  ctx.strokeStyle = borderColor;
-  ctx.strokeRect(x + r / 2, y + r / 2, w - r, h - r);
-  ctx.fillStyle = borderColor;
-  DrawFilledRect(x + r / 2, y + r / 2, w - r, h - r);
-
-  // Inner frame
-  ctx.strokeStyle = backgroundColor;
-  ctx.strokeRect(
-    x + r / 2 + thickness,
-    y + r / 2 + thickness,
-    w - r - thickness * 2,
-    h - r - thickness * 2
-  );
-  ctx.fillStyle = backgroundColor;
-  DrawFilledRect(
-    x + r / 2 + thickness,
-    y + r / 2 + thickness,
-    w - r - thickness * 2,
-    h - r - thickness * 2
-  );
-};
 
 // Draw a filled rectangle.
 function DrawFilledRect(x, y, w, h) {
