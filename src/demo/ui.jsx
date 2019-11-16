@@ -391,22 +391,39 @@ const wordSet = {
   long: {
     text: ['Choose a new word to teach A.I.'],
     choices: [
+  //    [
+//        'Friendly',
+//        'Funny',
+//        'Bizarre',
+//        'Shy',
+//        'Glitchy',
+//        'Delicious',
+//        'Fun',
+//        'Angry',
+//        'Fast',
+//        'Smart',
+//        'Brave',
+//        'Scary',
+//        'Wild',
+//        'Fierce',
+//        'Tropical'
+//      ]
       [
-        'Friendly',
-        'Funny',
-        'Bizarre',
-        'Shy',
+        'Crunchy',
+        'Floppy',
+        'Fresh',
         'Glitchy',
-        'Delicious',
-        'Fun',
-        'Angry',
-        'Fast',
-        'Smart',
-        'Brave',
-        'Scary',
-        'Wild',
-        'Fierce',
-        'Tropical'
+        'Glossy',
+        'Hungry',
+        'Jolly',
+        'Playful',
+        'Scaly',
+        'Scrappy',
+        'Sly',
+        'Spiky',
+        'Squirmy',
+        'Tropical',
+        'Wacky',
       ]
     ],
     style: styles.button3col
