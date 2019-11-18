@@ -19,6 +19,8 @@ import {
   faForward
 } from '@fortawesome/free-solid-svg-icons';
 
+import {downloadFish} from '../utils/downloadFishImages';
+
 const styles = {
   body: {
     position: 'relative',
@@ -512,9 +514,9 @@ let Train = class Train extends React.Component {
         </div>
         <Button
           style={styles.continueButton}
-          onClick={() => toMode(Modes.Predicting)}
+          onClick={() => downloadFish(state.fishData)}
         >
-          Continue
+          Download
         </Button>
       </Body>
     );
