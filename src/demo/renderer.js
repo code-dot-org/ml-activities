@@ -321,7 +321,7 @@ const drawMovingFish = state => {
         const midScreenX =
           constants.canvasWidth / 2 - constants.fishCanvasWidth / 2;
         drawPrediction = x >= midScreenX;
-        const nearCenterX = x - midScreenX <= 50;
+        const nearCenterX = Math.abs(midScreenX - x) <= 1;
 
         if (drawPrediction && nearCenterX) {
           centerFish = fish;
@@ -338,7 +338,7 @@ const drawMovingFish = state => {
               fish.result.predictedClassId = 1;
             }
 
-            if (i === lastFishIdx && Math.abs(midScreenX - x) <= 1) {
+            if (i === lastFishIdx) {
               finishMovement(t);
               setState({biasTextTime: $time()});
             }
