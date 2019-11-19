@@ -554,20 +554,9 @@ let Predict = class Predict extends React.Component {
     }
   };
 
-  finishMovement = () => {
-    const state = getState();
-
-    const t = currentRunTime(state);
-    if (state.rewind) {
-      finishMovement(state.lastPauseTime - t);
-    } else {
-      finishMovement(state.lastPauseTime + t);
-    }
-  };
-
   onPressPlay = () => {
     const state = getState();
-    this.finishMovement();
+    finishMovement();
     setState({
       isRunning: !state.isRunning,
       isPaused: !state.isPaused,
@@ -578,7 +567,7 @@ let Predict = class Predict extends React.Component {
   };
 
   onScaleTime = rewind => {
-    this.finishMovement();
+    finishMovement();
     const nextIdx = timeScales.indexOf(this.state.timeScale) + 1;
     const timeScale =
       nextIdx > timeScales.length - 1 ? timeScales[0] : timeScales[nextIdx];

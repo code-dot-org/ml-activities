@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import queryString from 'query-string';
 import {FishBodyPart} from '../utils/fishData';
-import {setState} from './state';
+import {getState, setState} from './state';
 import {Modes} from './constants';
 import labBackground from '../../public/images/lab-background.png';
 import waterBackground from '../../public/images/water-background.png';
@@ -161,7 +161,18 @@ export const currentRunTime = (state, clampTime = false) => {
 
 // Sets the necessary state to stop fish movement at any time, t.
 // Pausing is optional, but defaults to true.
-export const finishMovement = (t, pause = true) => {
+export const finishMovement = (t = null, pause = true) => {
+  if (!t) {
+    const state = getState();
+    t = currentRunTime(state);
+
+    if (state.rewind) {
+      t = state.lastPauseTime - t;
+    } else {
+      t = state.lastPauseTime + t;
+    }
+  }
+
   setState({
     isRunning: false,
     isPaused: pause,
