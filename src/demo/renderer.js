@@ -281,10 +281,16 @@ const getYForFish = (numFish, fishIdx, state, offsetX, predictedClassId) => {
   return y;
 };
 
-const drawMovingFish = state => {
+const getTimes = state => {
   const runtime = currentRunTime(state, state.currentMode === Modes.Training);
   let t = currentRawXOffset ? 0 : state.lastPauseTime;
   t += state.rewind ? -runtime : runtime;
+
+  return {runtime, t};
+};
+
+const drawMovingFish = state => {
+  const {runtime, t} = getTimes(state);
 
   const offsetX = getOffsetForTime(state, t, currentRawXOffset);
   lastRawXOffset = getRawOffsetForTime(state, t, currentRawXOffset);
