@@ -635,7 +635,7 @@ let Predict = class Predict extends React.Component {
               ]}
               key={MediaControl.Play}
             >
-              <FontAwesomeIcon icon={state.isRunning ? faPause : faPlay} />
+              <FontAwesomeIcon icon={state.isPaused ? faPause : faPlay} />
             </span>
             <span
               onClick={() => this.onScaleTime(false)}
