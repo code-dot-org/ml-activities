@@ -37,7 +37,6 @@ let botY, botYDestination;
 let currentPredictedClassId;
 let predictionImages = {};
 let predictionIndex;
-let cachedMoveTime; // TODO: FIX THIS VALUE
 
 /**
  * currentRawXOffset & lastRawXOffset track fish movement.
@@ -102,7 +101,7 @@ export const render = () => {
     setState({
       isRunning: true,
       isPaused: false,
-      moveTime: cachedMoveTime || constants.defaultMoveTime
+      moveTime: constants.defaultMoveTime / state.timeScale
     });
   }
 
@@ -376,7 +375,6 @@ const drawMovingFish = state => {
 
     if (canDrawPrediction) {
       if (centerFish && i !== state.predictingIndex) {
-        cachedMoveTime = state.moveTime;
         finishMovement();
         setState({
           predictingIndex: i,
@@ -440,8 +438,9 @@ const drawPrediction = (ctx, x, y, index) => {
     t = $time() - state.predictionStartTime;
   }
 
-  // No-op if fish or prediction cannot be found.
-  if (!fish || (fish && !fish.getResult())) {
+  // No-op if fish or prediction cannot be found, or prediction should be hidden (based on t).
+  const hidePrediction = t < 250;
+  if (!fish || (fish && !fish.getResult()) || hidePrediction) {
     return;
   }
 
@@ -453,27 +452,25 @@ const drawPrediction = (ctx, x, y, index) => {
   const adjustedY = fishY - yDiff;
   const predictedClassId = fish.getResult().predictedClassId;
 
-  if (t >= 250) {
-    // Draw square around item
-    ctx.beginPath();
-    const color =
-      predictedClassId === ClassType.Like ? colors.brightGreen : colors.red;
-    ctx.lineWidth = '2';
-    DrawRect(adjustedX, adjustedY, rectSize, rectSize, color, false);
-    ctx.stroke();
+  // Draw square around item
+  ctx.beginPath();
+  const color =
+    predictedClassId === ClassType.Like ? colors.brightGreen : colors.red;
+  ctx.lineWidth = '2';
+  DrawRect(adjustedX, adjustedY, rectSize, rectSize, color, false);
+  ctx.stroke();
 
-    // Draw icon below square. This code expects predictionImages to be populated
-    // with cached like/dislike icons.
-    const icon =
-      predictedClassId === ClassType.Like
-        ? predictionImages.like
-        : predictionImages.dislike;
+  // Draw icon below square. This code expects predictionImages to be populated
+  // with cached like/dislike icons.
+  const icon =
+    predictedClassId === ClassType.Like
+      ? predictionImages.like
+      : predictionImages.dislike;
 
-    if (icon) {
-      const iconX = adjustedX + rectSize / 2 - icon.width / 2;
-      const iconY = adjustedY + rectSize + 10;
-      ctx.drawImage(icon, iconX, iconY);
-    }
+  if (icon) {
+    const iconX = adjustedX + rectSize / 2 - icon.width / 2;
+    const iconY = adjustedY + rectSize + 10;
+    ctx.drawImage(icon, iconX, iconY);
   }
 };
 

@@ -16,6 +16,7 @@ const initialState = {
   isRunning: false,
   isPaused: false,
   moveTime: 1000,
+  timeScale: 1,
   lastStartTime: null,
   lastPauseTime: 0,
   runStartTime: null,

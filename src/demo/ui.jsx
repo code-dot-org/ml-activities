@@ -540,7 +540,6 @@ let Train = class Train extends React.Component {
 };
 Train = Radium(Train);
 
-const defaultTimeScale = 1;
 const timeScales = [1, 2];
 const MediaControl = Object.freeze({
   Rewind: 'rewind',
@@ -550,8 +549,7 @@ const MediaControl = Object.freeze({
 
 let Predict = class Predict extends React.Component {
   state = {
-    displayControls: false,
-    timeScale: defaultTimeScale
+    displayControls: false
   };
 
   onRun = () => {
@@ -577,14 +575,14 @@ let Predict = class Predict extends React.Component {
       isRunning: !state.isRunning,
       isPaused: !state.isPaused,
       rewind: false,
-      moveTime: constants.defaultMoveTime / defaultTimeScale
+      moveTime: constants.defaultMoveTime / constants.defaultTimeScale,
+      timeScale: constants.defaultTimeScale
     });
-    this.setState({timeScale: defaultTimeScale});
   };
 
   onScaleTime = rewind => {
     finishMovement();
-    const nextIdx = timeScales.indexOf(this.state.timeScale) + 1;
+    const nextIdx = timeScales.indexOf(getState().timeScale) + 1;
     const timeScale =
       nextIdx > timeScales.length - 1 ? timeScales[0] : timeScales[nextIdx];
 
@@ -592,9 +590,9 @@ let Predict = class Predict extends React.Component {
       rewind,
       isRunning: true,
       isPaused: false,
-      moveTime: constants.defaultMoveTime / timeScale
+      moveTime: constants.defaultMoveTime / timeScale,
+      timeScale
     });
-    this.setState({timeScale});
   };
 
   render() {
@@ -605,7 +603,7 @@ let Predict = class Predict extends React.Component {
     } else if (
       state.isRunning &&
       !state.rewind &&
-      this.state.timeScale !== defaultTimeScale
+      state.timeScale !== constants.defaultTimeScale
     ) {
       selectedControl = MediaControl.FastForward;
     } else {
@@ -627,8 +625,8 @@ let Predict = class Predict extends React.Component {
             >
               <span style={styles.timeScale}>
                 {selectedControl === MediaControl.Rewind &&
-                  this.state.timeScale !== defaultTimeScale &&
-                  `x${this.state.timeScale}`}
+                  state.timeScale !== constants.defaultTimeScale &&
+                  `x${state.timeScale}`}
               </span>
               <FontAwesomeIcon icon={faBackward} />
             </span>
@@ -654,8 +652,8 @@ let Predict = class Predict extends React.Component {
               <FontAwesomeIcon icon={faForward} />
               <span style={styles.timeScale}>
                 {selectedControl === MediaControl.FastForward &&
-                  this.state.timeScale !== defaultTimeScale &&
-                  `x${this.state.timeScale}`}
+                  state.timeScale !== constants.defaultTimeScale &&
+                  `x${state.timeScale}`}
               </span>
             </span>
           </div>
@@ -696,8 +694,8 @@ class Pond extends React.Component {
     const pondHeight = boundingRect.height;
 
     // Scale the click to the pond canvas dimensions.
-    const normalizedClickX = clickX / pondWidth * constants.canvasWidth;
-    const normalizedClickY = clickY / pondHeight * constants.canvasHeight;
+    const normalizedClickX = (clickX / pondWidth) * constants.canvasWidth;
+    const normalizedClickY = (clickY / pondHeight) * constants.canvasHeight;
 
     if (state.pondFishBounds) {
       let fishClicked = false;
@@ -759,7 +757,7 @@ class Pond extends React.Component {
     };
 
     return (
-      <Body onClick={(e) => this.onPondClick(e)}>
+      <Body onClick={e => this.onPondClick(e)}>
         <img style={styles.pondBot} src={aiBotClosed} />
         {state.canSkipPond && (
           <div>
