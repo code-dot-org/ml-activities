@@ -37,7 +37,7 @@ let botY, botYDestination;
 let currentPredictedClassId;
 let predictionImages = {};
 let predictionIndex;
-let cachedMoveTime;
+let cachedMoveTime; // TODO: FIX THIS VALUE
 
 /**
  * currentRawXOffset & lastRawXOffset track fish movement.
@@ -342,7 +342,7 @@ const drawMovingFish = state => {
       if (fish.getResult()) {
         const midScreenX = fishMidScreenX();
         canDrawPrediction = x >= midScreenX;
-        const nearCenterX = x - midScreenX <= 50;
+        const nearCenterX = x - midScreenX <= 25;
 
         if (canDrawPrediction && nearCenterX) {
           centerFish = fish;
@@ -380,9 +380,10 @@ const drawMovingFish = state => {
         finishMovement();
         setState({
           predictingIndex: i,
+          predictionStartTime: $time(),
           isRunning: true,
           isPaused: false,
-          moveTime: state.moveTime * 1.5
+          moveTime: state.moveTime * 1.75
         });
       }
 
@@ -398,7 +399,10 @@ const drawMovingFish = state => {
       : null;
 
     if (!centerFish) {
-      setState({predictingIndex: null});
+      setState({
+        predictingIndex: null,
+        predictionStartTime: null
+      });
     }
   }
 
@@ -431,8 +435,13 @@ const drawPrediction = (ctx, x, y, index) => {
   const state = getState();
   const fish = state.fishData[index];
 
+  let t = 1000;
+  if (index === state.predictingIndex) {
+    t = $time() - state.predictionStartTime;
+  }
+
   // No-op if fish or prediction cannot be found.
-  if (!fish && !fish.getResult()) {
+  if (!fish || (fish && !fish.getResult())) {
     return;
   }
 
@@ -442,12 +451,10 @@ const drawPrediction = (ctx, x, y, index) => {
   const yDiff = Math.abs(rectSize - constants.fishCanvasHeight) / 2;
   const adjustedX = fishX + xDiff;
   const adjustedY = fishY - yDiff;
-
-  const midScreenX = fishMidScreenX();
   const predictedClassId = fish.getResult().predictedClassId;
 
   // Draw square around item
-  if (x >= midScreenX + 25) {
+  if (t >= 250) {
     ctx.beginPath();
     const color =
       predictedClassId === ClassType.Like ? colors.brightGreen : colors.red;
@@ -463,7 +470,7 @@ const drawPrediction = (ctx, x, y, index) => {
       ? predictionImages.like
       : predictionImages.dislike;
 
-  if (icon && x >= midScreenX + 50) {
+  if (icon && t >= 500) {
     const iconX = adjustedX + rectSize / 2 - icon.width / 2;
     const iconY = adjustedY + rectSize + 10;
     ctx.drawImage(icon, iconX, iconY);
