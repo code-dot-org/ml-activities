@@ -453,27 +453,27 @@ const drawPrediction = (ctx, x, y, index) => {
   const adjustedY = fishY - yDiff;
   const predictedClassId = fish.getResult().predictedClassId;
 
-  // Draw square around item
   if (t >= 250) {
+    // Draw square around item
     ctx.beginPath();
     const color =
       predictedClassId === ClassType.Like ? colors.brightGreen : colors.red;
     ctx.lineWidth = '2';
     DrawRect(adjustedX, adjustedY, rectSize, rectSize, color, false);
     ctx.stroke();
-  }
 
-  // Draw icon below square. This code expects predictionImages to be populated
-  // with cached like/dislike icons.
-  const icon =
-    predictedClassId === ClassType.Like
-      ? predictionImages.like
-      : predictionImages.dislike;
+    // Draw icon below square. This code expects predictionImages to be populated
+    // with cached like/dislike icons.
+    const icon =
+      predictedClassId === ClassType.Like
+        ? predictionImages.like
+        : predictionImages.dislike;
 
-  if (icon && t >= 500) {
-    const iconX = adjustedX + rectSize / 2 - icon.width / 2;
-    const iconY = adjustedY + rectSize + 10;
-    ctx.drawImage(icon, iconX, iconY);
+    if (icon) {
+      const iconX = adjustedX + rectSize / 2 - icon.width / 2;
+      const iconY = adjustedY + rectSize + 10;
+      ctx.drawImage(icon, iconX, iconY);
+    }
   }
 };
 
