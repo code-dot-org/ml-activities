@@ -11,6 +11,7 @@ const initialState = {
   ctx: null,
   trainer: null,
   trainingIndex: 0,
+  predictingIndex: 0,
   isRunning: false,
   isPaused: false,
   moveTime: 1000,

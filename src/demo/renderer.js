@@ -35,6 +35,8 @@ let botVelocity = 10;
 let botY, botYDestination;
 let currentPredictedClassId;
 let predictionImages = {};
+let predictionIndex;
+let cachedMoveTime;
 
 /**
  * currentRawXOffset & lastRawXOffset track fish movement.
@@ -92,6 +94,15 @@ export const render = () => {
       state.isRunning !== prevState.isRunning)
   ) {
     currentRawXOffset = lastRawXOffset;
+  }
+
+  if (!state.predictingIndex && prevState.predictingIndex) {
+    finishMovement();
+    setState({
+      isRunning: true,
+      isPaused: false,
+      moveTime: cachedMoveTime || constants.defaultMoveTime
+    });
   }
 
   if (state.isRunning && !state.lastStartTime) {
@@ -289,6 +300,10 @@ const getTimes = state => {
   return {runtime, t};
 };
 
+const fishMidScreenX = () => {
+  return constants.canvasWidth / 2 - constants.fishCanvasWidth / 2;
+};
+
 const drawMovingFish = state => {
   const {runtime, t} = getTimes(state);
 
@@ -309,7 +324,7 @@ const drawMovingFish = state => {
   );
   const ctx = state.canvas.getContext('2d');
 
-  let centerFish;
+  let centerFish, centerFishIndex;
   for (let i = startFishIdx; i <= lastFishIdx; i++) {
     const fish = state.fishData[i];
     const x = getXForFish(state.fishData.length - 1, i, offsetX);
@@ -321,16 +336,16 @@ const drawMovingFish = state => {
       fish.getResult() ? fish.getResult().predictedClassId : false
     );
 
-    let drawPrediction = false;
+    let canDrawPrediction = false;
     if (state.currentMode === Modes.Predicting) {
       if (fish.getResult()) {
-        const midScreenX =
-          constants.canvasWidth / 2 - constants.fishCanvasWidth / 2;
-        drawPrediction = x >= midScreenX;
-        const nearCenterX = Math.abs(midScreenX - x) <= 1;
+        const midScreenX = fishMidScreenX();
+        canDrawPrediction = x >= midScreenX;
+        const nearCenterX = x - midScreenX <= 50;
 
-        if (drawPrediction && nearCenterX) {
+        if (canDrawPrediction && nearCenterX) {
           centerFish = fish;
+          centerFishIndex = i;
 
           if (
             state.isRunning &&
@@ -344,7 +359,8 @@ const drawMovingFish = state => {
               fish.result.predictedClassId = 1;
             }
 
-            if (i === lastFishIdx) {
+            const atCenterX = Math.abs(midScreenX - x) <= 1;
+            if (i === lastFishIdx && atCenterX) {
               finishMovement(t);
               setState({biasTextTime: $time()});
             }
@@ -357,14 +373,32 @@ const drawMovingFish = state => {
       }
     }
 
-    const drawPolaroid = state.currentMode === Modes.Training;
-    drawSingleFish(fish, x, y, ctx, 1, drawPrediction, drawPolaroid);
+    if (canDrawPrediction) {
+      if (centerFish && i !== state.predictingIndex) {
+        cachedMoveTime = state.moveTime;
+        finishMovement();
+        setState({
+          predictingIndex: i,
+          isRunning: true,
+          isPaused: false,
+          moveTime: state.moveTime * 1.5
+        });
+      }
+
+      drawPrediction(ctx, x, y, i, fish.getResult().predictedClassId);
+    }
+
+    drawSingleFish(fish, x, y, ctx, 1);
   }
 
   if (state.currentMode === Modes.Predicting) {
     currentPredictedClassId = centerFish
       ? centerFish.getResult().predictedClassId
       : null;
+
+    if (!centerFish) {
+      setState({predictingIndex: null});
+    }
   }
 
   if (state.currentMode === Modes.Training && runtime === state.moveTime) {
@@ -389,30 +423,46 @@ const drawPolaroid = (ctx, x, y) => {
   DrawRect(adjustedX, adjustedY, rectSize, rectSize, colors.darkGrey);
 };
 
-// Draws a prediction stamp to the canvas for the given classId.
+// Draws a prediction stamp to the canvas for the item at the given index in state.fishData.
 // Note: This method requires icons to be cached in predictionImages.
 // Call loadAllPredictionImages() before this method.
-const drawPrediction = (ctx, x, y, classId) => {
+const drawPrediction = (ctx, x, y, index) => {
+  const state = getState();
+  const fish = state.fishData[index];
+
+  // No-op if fish or prediction cannot be found.
+  if (!fish && !fish.getResult()) {
+    return;
+  }
+
   const rectSize = constants.fishFrameSize;
+  const {x: fishX, y: fishY} = getAdjustmentsForFish(state.canvas, x, y);
   const xDiff = Math.abs(rectSize - constants.fishCanvasWidth) / 2;
-  const adjustedX = x + xDiff;
   const yDiff = Math.abs(rectSize - constants.fishCanvasHeight) / 2;
-  const adjustedY = y - yDiff;
+  const adjustedX = fishX + xDiff;
+  const adjustedY = fishY - yDiff;
+
+  const midScreenX = fishMidScreenX();
+  const predictedClassId = fish.getResult().predictedClassId;
 
   // Draw square around item
-  ctx.beginPath();
-  const color = classId === ClassType.Like ? colors.brightGreen : colors.red;
-  ctx.lineWidth = '2';
-  DrawRect(adjustedX, adjustedY, rectSize, rectSize, color, false);
-  ctx.stroke();
+  if (x >= midScreenX + 25) {
+    ctx.beginPath();
+    const color =
+      predictedClassId === ClassType.Like ? colors.brightGreen : colors.red;
+    ctx.lineWidth = '2';
+    DrawRect(adjustedX, adjustedY, rectSize, rectSize, color, false);
+    ctx.stroke();
+  }
 
   // Draw icon below square. This code expects predictionImages to be populated
   // with cached like/dislike icons.
   const icon =
-    classId === ClassType.Like
+    predictedClassId === ClassType.Like
       ? predictionImages.like
       : predictionImages.dislike;
-  if (icon) {
+
+  if (icon && x >= midScreenX + 50) {
     const iconX = adjustedX + rectSize / 2 - icon.width / 2;
     const iconY = adjustedY + rectSize + 10;
     ctx.drawImage(icon, iconX, iconY);
@@ -501,18 +551,21 @@ const drawPondFishImages = () => {
   });
 };
 
+const getAdjustmentsForFish = (canvas, x, y, size = 1) => {
+  const width = canvas.width * size;
+  const height = canvas.height * size;
+
+  // Maintain the center of the fish.
+  x = x - width / 2 + canvas.width / 2;
+  y = y - height / 2 + canvas.height / 2;
+
+  return {width, height, x, y};
+};
+
 // Draw a single fish, preferably from cached canvas.
 // Used by drawMovingFish and drawPondFishImages.
 // Takes an optional size multipler, where 0.5 means fish are half size.
-const drawSingleFish = (
-  fish,
-  fishXPos,
-  fishYPos,
-  ctx,
-  size = 1,
-  withPrediction = false,
-  withPolaroid = false
-) => {
+const drawSingleFish = (fish, fishXPos, fishYPos, ctx, size = 1) => {
   const [fishCanvas, hit] = canvasCache.getCanvas(fish.id);
   if (!hit) {
     fishCanvas.width = constants.fishCanvasWidth;
@@ -522,33 +575,20 @@ const drawSingleFish = (
 
   // TODO: Does scaling during drawImage have a performance impact on some
   // devices/browsers?  We might need to pre-cache scaled images.
-  const width = fishCanvas.width * size;
-  const height = fishCanvas.height * size;
 
   // Maintain the center of the fish.
-  const adjustedFishXPos = fishXPos - width / 2 + fishCanvas.width / 2;
-  const adjustedFishYPos = fishYPos - height / 2 + fishCanvas.height / 2;
-
-  if (withPolaroid) {
-    drawPolaroid(ctx, adjustedFishXPos, adjustedFishYPos);
-  }
-
-  if (withPrediction && fish.getResult()) {
-    drawPrediction(
-      ctx,
-      adjustedFishXPos,
-      adjustedFishYPos,
-      fish.getResult().predictedClassId
-    );
-  }
-
-  ctx.drawImage(
+  const {width, height, x, y} = getAdjustmentsForFish(
     fishCanvas,
-    Math.round(adjustedFishXPos),
-    Math.round(adjustedFishYPos),
-    width,
-    height
+    fishXPos,
+    fishYPos,
+    size
   );
+
+  if (getState().currentMode === Modes.Training) {
+    drawPolaroid(ctx, x, y);
+  }
+
+  ctx.drawImage(fishCanvas, Math.round(x), Math.round(y), width, height);
 };
 
 // Clear the sprite canvas.
