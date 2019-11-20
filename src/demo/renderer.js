@@ -86,6 +86,15 @@ export const render = () => {
     }
   }
 
+  if (!state.predictingIndex && prevState.predictingIndex) {
+    finishMovement();
+    state = setState({
+      isRunning: true,
+      isPaused: false,
+      moveTime: constants.defaultMoveTime / state.timeScale
+    });
+  }
+
   if (
     state.currentMode === Modes.Predicting &&
     state.lastPauseTime &&
@@ -94,15 +103,6 @@ export const render = () => {
       state.isRunning !== prevState.isRunning)
   ) {
     currentRawXOffset = lastRawXOffset;
-  }
-
-  if (!state.predictingIndex && prevState.predictingIndex) {
-    finishMovement();
-    setState({
-      isRunning: true,
-      isPaused: false,
-      moveTime: constants.defaultMoveTime / state.timeScale
-    });
   }
 
   if (state.isRunning && !state.lastStartTime) {
@@ -435,7 +435,11 @@ const drawPrediction = (ctx, x, y, index) => {
 
   let t = 1000;
   if (index === state.predictingIndex) {
-    t = $time() - state.predictionStartTime;
+    if (state.rewind) {
+      t = state.predictionStartTime - $time();
+    } else {
+      t = $time() - state.predictionStartTime;
+    }
   }
 
   // No-op if fish or prediction cannot be found, or prediction should be hidden (based on t).

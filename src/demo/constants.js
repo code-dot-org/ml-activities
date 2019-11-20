@@ -4,7 +4,7 @@ const constants = {
   fishCanvasWidth: 300,
   fishCanvasHeight: 200,
   fishFrameSize: 210,
-  defaultMoveTime: 1000, // TODO: DELETE THIS?
+  defaultMoveTime: 1000,
   defaultTimeScale: 1
 };
 
