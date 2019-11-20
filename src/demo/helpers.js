@@ -14,9 +14,9 @@ export const $time =
 
 export const backgroundPathForMode = mode => {
   let img;
-  if (mode === Modes.Words || mode === Modes.Pond) {
+  if (mode === Modes.Words || mode === Modes.Pond || mode === Modes.Predicting) {
     img = waterBackground;
-  } else if (mode === Modes.Training || mode === Modes.Predicting) {
+  } else if (mode === Modes.Training) {
     img = labBackground;
   }
   return img ? img : null;
@@ -178,5 +178,13 @@ export const finishMovement = (t = null, pause = true) => {
     isPaused: pause,
     lastPauseTime: t,
     lastStartTime: null
+  });
+};
+
+export const resetTraining = () => {
+  setState({
+    trainer: null,
+    yesCount: 0,
+    noCount: 0
   });
 };
