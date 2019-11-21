@@ -240,7 +240,8 @@ const getOffsetForTime = (state, t, offset = 0) => {
   let amount = getRawOffsetForTime(state, t, offset);
 
   // Apply an S-curve to that amount.
-  amount -= Math.sin(amount * 2 * Math.PI) / (2 * Math.PI);
+  amount -= Math.sin(amount * 2 * Math.PI) * ((0.25 * amount) / amount);
+  // amount -= Math.sin(amount * 2 * Math.PI) / (2 * Math.PI);
 
   return (
     constants.fishCanvasWidth * state.fishData.length -
@@ -267,18 +268,17 @@ const getXForFish = (numFish, fishIdx, offsetX) => {
 const getYForFish = (numFish, fishIdx, state, offsetX, predictedClassId) => {
   let y = constants.canvasHeight / 2 - constants.fishCanvasHeight / 2;
 
-  // Move fish down a little on predict screen.
   if (state.currentMode === Modes.Predicting) {
+    // Move fish down a little on predict screen.
     y += 50;
 
     // And drop the fish down even more if they are not liked.
     const doesLike = predictedClassId === ClassType.Like;
     if (!doesLike) {
-      const midScreenX =
-        constants.canvasWidth / 2 - constants.fishCanvasWidth / 2;
+      const midScreenX = fishMidScreenX() + 50;
       const screenX = getXForFish(numFish, fishIdx, offsetX);
       if (screenX > midScreenX) {
-        y += screenX - midScreenX;
+        y += (screenX - midScreenX) * 2;
       }
     }
 
@@ -292,20 +292,14 @@ const getYForFish = (numFish, fishIdx, state, offsetX, predictedClassId) => {
   return y;
 };
 
-const getTimes = state => {
-  const runtime = currentRunTime(state, state.currentMode === Modes.Training);
-  let t = currentRawXOffset ? 0 : state.lastPauseTime;
-  t += state.rewind ? -runtime : runtime;
-
-  return {runtime, t};
-};
-
 const fishMidScreenX = () => {
   return constants.canvasWidth / 2 - constants.fishCanvasWidth / 2;
 };
 
 const drawMovingFish = state => {
-  const {runtime, t} = getTimes(state);
+  const runtime = currentRunTime(state, state.currentMode === Modes.Training);
+  let t = currentRawXOffset ? 0 : state.lastPauseTime;
+  t += state.rewind ? -runtime : runtime;
 
   const offsetX = getOffsetForTime(state, t, currentRawXOffset);
   lastRawXOffset = getRawOffsetForTime(state, t, currentRawXOffset);
@@ -341,7 +335,7 @@ const drawMovingFish = state => {
       if (fish.getResult()) {
         const midScreenX = fishMidScreenX();
         canDrawPrediction = x >= midScreenX;
-        const nearCenterX = x - midScreenX <= 25;
+        const nearCenterX = x - midScreenX <= 50;
 
         if (canDrawPrediction && nearCenterX) {
           centerFish = fish;
@@ -381,7 +375,7 @@ const drawMovingFish = state => {
           predictionStartTime: $time(),
           isRunning: true,
           isPaused: false,
-          moveTime: state.moveTime * 1.75
+          moveTime: state.moveTime * 1.25
         });
       }
 
