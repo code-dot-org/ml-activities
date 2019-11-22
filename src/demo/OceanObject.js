@@ -9,7 +9,6 @@ import {
 } from './helpers';
 import {trashImagePaths, seaCreatureImagePaths} from '../utils/imagePaths';
 import model from './model.json';
-import shard1of1 from './group1-shard1of1.bin';
 
 let fishPartImages = {};
 let trashImages = [];
@@ -65,25 +64,9 @@ export const loadAllFishPartImages = () => {
   });
 };
 
-const loadHandler = {
-  load: async () => {
-    const { weightsManifest, ...modelArtifacts } = model;
-    const [weightsManifestGroupConfig] = weightsManifest;
-    const { weights } = weightsManifestGroupConfig;
-
-    modelArtifacts.weightSpecs = weights;
-
-    // Convert shard1of1 from data URI to ArrayBuffer in two steps:
-    const result = await fetch(shard1of1);
-    modelArtifacts.weightData = await result.arrayBuffer();
-
-    return modelArtifacts;
-  }
-}
-
 export const initMobilenet = () => {
   return mobilenetModule
-    .load({version: 1, modelUrl: loadHandler})
+    .load({version: 1, modelUrl: model})
     .then(res => (mobilenet = res));
 };
 
@@ -260,6 +243,16 @@ export class FishOceanObject extends OceanObject {
       ...this.tail.knnData,
       ...this.scales.knnData,
       ...this.colorPalette.knnData
+    ];
+    this.fieldInfos = [
+      ...this.body.fieldInfos,
+      ...this.eye.fieldInfos,
+      ...this.mouth.fieldInfos,
+      ...this.pectoralFinFront.fieldInfos,
+      ...this.dorsalFin.fieldInfos,
+      ...this.tail.fieldInfos,
+      ...this.scales.fieldInfos,
+      ...this.colorPalette.fieldInfos
     ];
   }
 

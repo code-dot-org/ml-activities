@@ -3,7 +3,9 @@ const constants = {
   canvasHeight: 576,
   fishCanvasWidth: 300,
   fishCanvasHeight: 200,
-  defaultMoveTime: 1000
+  fishFrameSize: 210,
+  defaultMoveTime: 1000,
+  maxPondFish: 20
 };
 
 export default constants;

@@ -2,8 +2,9 @@ import _ from 'lodash';
 import queryString from 'query-string';
 import {FishBodyPart} from '../utils/fishData';
 import {setState} from './state';
-// import {Modes} from './constants';
-// import underwaterBackground from '../../public/images/underwater-background.png';
+import {Modes} from './constants';
+import labBackground from '../../public/images/lab-background.png';
+import waterBackground from '../../public/images/water-background.png';
 
 export const $time =
   Date.now ||
@@ -12,19 +13,13 @@ export const $time =
   };
 
 export const backgroundPathForMode = mode => {
-  // Temporarily disable background everywhere.
-  return null;
-
-  // TODO: fix this
-  // let imgName;
-  // if (mode === Modes.Words || mode === Modes.Pond) {
-  //   imgName = 'underwater';
-  // }
-  // return imgName ? underwaterBackground : null;
-};
-
-export const backgroundPath = imgName => {
-  return `images/${imgName}-background.png`;
+  let img;
+  if (mode === Modes.Pond || mode === Modes.Predicting) {
+    img = waterBackground;
+  } else if (mode === Modes.Words || mode === Modes.Training) {
+    img = labBackground;
+  }
+  return img ? img : null;
 };
 
 export const bodyAnchorFromType = (body, type) => {
@@ -61,7 +56,7 @@ export const colorForFishPart = (palette, part) => {
       return palette.bodyRgb;
     case FishBodyPart.SCALES:
       //return palette.bodyRgb.map(c => c + 20);
-      return [0,0,0];
+      return [0, 0, 0];
     default:
       return null;
   }
@@ -146,7 +141,8 @@ export const generateColorPalette = (colors, bodyIndex = null) => {
   return {
     bodyRgb: bodyColor.rgb,
     finRgb: colors[finIndex].rgb,
-    knnData: bodyColor.knnData
+    knnData: bodyColor.knnData,
+    fieldInfos: bodyColor.fieldInfos
   };
 };
 
@@ -172,5 +168,13 @@ export const finishMovement = (t, pause = true) => {
     isPaused: pause,
     lastPauseTime: t,
     lastStartTime: null
+  });
+};
+
+export const resetTraining = state => {
+  state.trainer.clearAll();
+  setState({
+    yesCount: 0,
+    noCount: 0
   });
 };

@@ -19,13 +19,19 @@ import {
   SeaCreatureOceanObject
 } from './OceanObject';
 import aiBotClosed from '../../public/images/ai-bot/ai-bot-closed.png';
-import aiBotCheckmark from '../../public/images/ai-bot/ai-bot-checkmark.png';
-import aiBotX from '../../public/images/ai-bot/ai-bot-x.png';
+import aiBotYes from '../../public/images/ai-bot/ai-bot-yes.png';
+import aiBotNo from '../../public/images/ai-bot/ai-bot-no.png';
 import redScanner from '../../public/images/ai-bot/red-scanner.png';
 import greenScanner from '../../public/images/ai-bot/green-scanner.png';
 import blueScanner from '../../public/images/ai-bot/blue-scanner.png';
+import {playSound} from './models/soundLibrary';
+import bluePredictionFrame from '../../public/images/blue-prediction-frame.png';
+import questionIcon from '../../public/images/question-icon.png';
+import greenPredictionFrame from '../../public/images/green-prediction-frame.png';
 import checkmarkIcon from '../../public/images/checkmark-icon.png';
+import redPredictionFrame from '../../public/images/red-prediction-frame.png';
 import banIcon from '../../public/images/ban-icon.png';
+import polaroidFrame from '../../public/images/polaroid-frame.png';
 
 let prevState = {};
 let currentModeStartTime = $time();
@@ -35,6 +41,7 @@ let botVelocity = 10;
 let botY, botYDestination;
 let currentPredictedClassId;
 let predictionImages = {};
+let polaroidFrameImage;
 
 /**
  * currentRawXOffset & lastRawXOffset track fish movement.
@@ -107,7 +114,7 @@ export const render = () => {
 
   switch (state.currentMode) {
     case Modes.Training:
-      drawFrame(state);
+      drawPolaroidFrame(state.canvas);
       drawMovingFish(state);
       break;
     case Modes.Predicting:
@@ -182,9 +189,9 @@ const loadAllBotImages = async () => {
   const imagesToLoad = {
     defaultBot: aiBotClosed,
     defaultScanner: blueScanner,
-    likeBot: aiBotCheckmark,
+    likeBot: aiBotYes,
     likeScanner: greenScanner,
-    dislikeBot: aiBotX,
+    dislikeBot: aiBotNo,
     dislikeScanner: redScanner
   };
   let imagePromises = [];
@@ -204,8 +211,12 @@ const loadAllBotImages = async () => {
 const loadAllPredictionImages = async () => {
   predictionImages = {}; // Empty previous cache
   const imagesToLoad = {
-    like: checkmarkIcon,
-    dislike: banIcon
+    defaultFrame: bluePredictionFrame,
+    defaultIcon: questionIcon,
+    likeFrame: greenPredictionFrame,
+    likeIcon: checkmarkIcon,
+    dislikeFrame: redPredictionFrame,
+    dislikeIcon: banIcon
   };
   let imagePromises = [];
 
@@ -352,7 +363,8 @@ const drawMovingFish = state => {
       }
     }
 
-    drawSingleFish(fish, x, y, ctx, 1, drawPrediction);
+    const drawPolaroid = state.currentMode === Modes.Training;
+    drawSingleFish(fish, x, y, ctx, 1, drawPrediction, drawPolaroid);
   }
 
   if (state.currentMode === Modes.Predicting) {
@@ -366,55 +378,96 @@ const drawMovingFish = state => {
   }
 };
 
-// Draws a prediction stamp to the canvas for the given classId.
-// Note: This method requires icons to be cached in predictionImages.
-// Call loadAllPredictionImages() before this method.
-const drawPrediction = (ctx, x, y, classId) => {
-  const rectSize = 210;
+const drawPolaroidFrame = canvas => {
+  if (polaroidFrameImage) {
+    const x = canvas.width / 2 - polaroidFrameImage.width / 2;
+    const y = canvas.height / 2 - polaroidFrameImage.height / 2 + 20;
+
+    canvas.getContext('2d').drawImage(polaroidFrameImage, x, y);
+  } else {
+    loadImage(polaroidFrame).then(img => {
+      polaroidFrameImage = img;
+      drawPolaroidFrame(canvas);
+    });
+  }
+};
+
+const drawPolaroid = (ctx, x, y) => {
+  const rectSize = constants.fishFrameSize;
   const xDiff = Math.abs(rectSize - constants.fishCanvasWidth) / 2;
   const adjustedX = x + xDiff;
   const yDiff = Math.abs(rectSize - constants.fishCanvasHeight) / 2;
   const adjustedY = y - yDiff;
 
-  // Draw square around item
-  ctx.beginPath();
-  ctx.lineWidth = '2';
-  ctx.strokeStyle =
-    classId === ClassType.Like ? colors.brightGreen : colors.red;
-  ctx.rect(adjustedX, adjustedY, rectSize, rectSize);
-  ctx.stroke();
+  // White outer polaroid frame
+  DrawRect(
+    adjustedX - 10,
+    adjustedY - 10,
+    rectSize + 20,
+    rectSize + 60,
+    colors.white
+  );
+  // Dark grey inner polaroid frame (where item is displayed)
+  DrawRect(adjustedX, adjustedY, rectSize, rectSize, colors.darkGrey);
+};
 
-  // Draw icon below square. This code expects predictionImages to be populated
-  // with cached like/dislike icons.
-  const icon =
-    classId === ClassType.Like
-      ? predictionImages.like
-      : predictionImages.dislike;
+const keyForClassId = classId => {
+  let classKey = 'default';
+  if (classId === ClassType.Like) {
+    classKey = 'like';
+  } else if (classId === ClassType.Dislike) {
+    classKey = 'dislike';
+  }
+
+  return classKey;
+};
+
+// Draws a prediction stamp to the canvas for the given classId.
+// *Note:* This will no-op if the expected frame/icon is not present
+// in the predictionImages cache. Call loadAllPredictionImages() to populate the predictionImages cache.
+const drawPrediction = (ctx, x, y, classId) => {
+  const classKey = keyForClassId(classId);
+  const frame = predictionImages[`${classKey}Frame`];
+  const icon = predictionImages[`${classKey}Icon`];
+  const w = (frame && frame.width) || constants.fishFrameSize;
+  const h = (frame && frame.height) || constants.fishFrameSize;
+  const adjustedX = x + Math.abs(w - constants.fishCanvasWidth) / 2;
+  const adjustedY = y - Math.abs(h - constants.fishCanvasHeight) / 2;
+
+  // Draw frame
+  if (frame) {
+    ctx.drawImage(frame, adjustedX, adjustedY);
+  }
+
+  // Draw icon below frame.
   if (icon) {
-    const iconX = adjustedX + rectSize / 2 - icon.width / 2;
-    const iconY = adjustedY + rectSize + 10;
+    const iconX = adjustedX + w / 2 - icon.width / 2;
+    const iconY = adjustedY + h + 15;
     ctx.drawImage(icon, iconX, iconY);
   }
 };
+
+let lastScannerImg = null;
 
 // Draw AI bot + scanner to canvas for predict mode.
 // *Note:* This will no-op if the expected bot/scanner is not present
 // in the botImages cache. Call loadAllBotImages() to populate the botImages cache.
 const drawPredictBot = state => {
-  let botImg, scannerImg;
-  if (currentPredictedClassId === ClassType.Like) {
-    botImg = botImages.likeBot;
-    scannerImg = botImages.likeScanner;
-  } else if (currentPredictedClassId === ClassType.Dislike) {
-    botImg = botImages.dislikeBot;
-    scannerImg = botImages.dislikeScanner;
-  } else {
-    botImg = botImages.defaultBot;
-    scannerImg = botImages.defaultScanner;
-  }
+  const classKey = keyForClassId(currentPredictedClassId);
+  const botImg = botImages[`${classKey}Bot`];
+  const scannerImg = botImages[`${classKey}Scanner`];
 
   if (!botImg || !scannerImg) {
     return;
+  }
+
+  if (scannerImg !== lastScannerImg) {
+    if (scannerImg === botImages.likeScanner) {
+      playSound('sortyes');
+    } else if (scannerImg === botImages.dislikeScanner) {
+      playSound('sortno');
+    }
+    lastScannerImg = scannerImg;
   }
 
   let botX = state.canvas.width / 2 - botImg.width / 2;
@@ -440,23 +493,6 @@ const drawPredictBot = state => {
   ctx.drawImage(botImg, botX, botY);
 };
 
-// Draw frame in the center of the screen.
-const drawFrame = state => {
-  const canvas = state.canvas;
-  const size = constants.fishCanvasWidth;
-  const frameXPos = canvas.width / 2 - size / 2;
-  const frameYPos = canvas.height / 2 - size / 2;
-  drawRoundedFrame(
-    canvas.getContext('2d'),
-    frameXPos,
-    frameYPos,
-    size,
-    size,
-    '#F0F0F0',
-    '#F0F0F0'
-  );
-};
-
 // Draw the fish for pond mode.
 const drawPondFishImages = () => {
   const canvas = getState().canvas;
@@ -470,10 +506,8 @@ const drawPondFishImages = () => {
 
     const swayValue =
       (($time() * 360) / (20 * 1000) + (fish.getId() + 1) * 10) % 360;
-    const swayMultipleX = 120;
-    const swayOffsetX =
-      Math.sin(((swayValue * Math.PI) / 180) * 2) * swayMultipleX;
-    const swayOffsetY = Math.sin(((swayValue * Math.PI) / 180) * 6) * 8;
+    const swayOffsetX = Math.sin(((swayValue * Math.PI) / 180) * 2) * 25;
+    const swayOffsetY = Math.sin(((swayValue * Math.PI) / 180) * 6) * 2;
 
     const xy = fish.getXY();
     const finalX = xy.x + swayOffsetX;
@@ -481,16 +515,12 @@ const drawPondFishImages = () => {
 
     const size = pondClickedFishUs ? 1 : 0.5;
 
-    drawSingleFish(fish, finalX, finalY, ctx, size);
+    const fishBound = drawSingleFish(fish, finalX, finalY, ctx, size);
 
     // Record this screen location so that we can separately check for clicks on it.
     fishBounds.push({
       fishId: fish.id,
-      x: finalX,
-      y: finalY,
-      w: constants.fishCanvasWidth / 2,
-      h: constants.fishCanvasHeight / 2,
-      confidence: fish.result
+      ...fishBound
     });
     setState({pondFishBounds: fishBounds}, {skipCallback: true});
   });
@@ -499,13 +529,15 @@ const drawPondFishImages = () => {
 // Draw a single fish, preferably from cached canvas.
 // Used by drawMovingFish and drawPondFishImages.
 // Takes an optional size multipler, where 0.5 means fish are half size.
+// Returns an object with x, y, width and height of actual draw.
 const drawSingleFish = (
   fish,
   fishXPos,
   fishYPos,
   ctx,
   size = 1,
-  withPrediction = false
+  withPrediction = false,
+  withPolaroid = false
 ) => {
   const [fishCanvas, hit] = canvasCache.getCanvas(fish.id);
   if (!hit) {
@@ -515,13 +547,17 @@ const drawSingleFish = (
   }
 
   // TODO: Does scaling during drawImage have a performance impact on some
-  // devices/browsers?  We migth need to pre-cache scaled images.
+  // devices/browsers?  We might need to pre-cache scaled images.
   const width = fishCanvas.width * size;
   const height = fishCanvas.height * size;
 
   // Maintain the center of the fish.
   const adjustedFishXPos = fishXPos - width / 2 + fishCanvas.width / 2;
   const adjustedFishYPos = fishYPos - height / 2 + fishCanvas.height / 2;
+
+  if (withPolaroid) {
+    drawPolaroid(ctx, adjustedFishXPos, adjustedFishYPos);
+  }
 
   if (withPrediction && fish.getResult()) {
     drawPrediction(
@@ -532,13 +568,12 @@ const drawSingleFish = (
     );
   }
 
-  ctx.drawImage(
-    fishCanvas,
-    Math.round(adjustedFishXPos),
-    Math.round(adjustedFishYPos),
-    width,
-    height
-  );
+  const finalX = Math.round(adjustedFishXPos);
+  const finalY = Math.round(adjustedFishYPos);
+
+  ctx.drawImage(fishCanvas, finalX, finalY, width, height);
+
+  return {x: finalX, y: finalY, w: width, h: height};
 };
 
 // Clear the sprite canvas.
@@ -547,75 +582,49 @@ export const clearCanvas = canvas => {
 };
 
 // Draw an overlay over the whole scene.  Used for fades.
-function drawOverlays() {
+const drawOverlays = () => {
   const duration = $time() - currentModeStartTime;
   let amount = 1 - duration / 800;
   if (amount < 0) {
     amount = 0;
   }
   DrawFade(amount, '#000');
-}
+};
 
 // Draw a fade over the scene.
-function DrawFade(amount, overlayColour) {
+const DrawFade = (amount, overlayColour) => {
   if (amount === 0) {
     return;
   }
 
   const canvasCtx = getState().canvas.getContext('2d');
   canvasCtx.globalAlpha = amount;
-  canvasCtx.fillStyle = overlayColour;
-  DrawFilledRect(0, 0, constants.canvasWidth, constants.canvasHeight);
+  DrawRect(0, 0, constants.canvasWidth, constants.canvasHeight, overlayColour);
   canvasCtx.globalAlpha = 1;
-}
-
-const drawRoundedFrame = (
-  ctx,
-  x,
-  y,
-  w,
-  h,
-  backgroundColor,
-  borderColor,
-  thickness = 2
-) => {
-  const r = 10;
-  ctx.lineJoin = 'round';
-  ctx.lineWidth = r;
-
-  // Outer frame
-  ctx.strokeStyle = borderColor;
-  ctx.strokeRect(x + r / 2, y + r / 2, w - r, h - r);
-  ctx.fillStyle = borderColor;
-  DrawFilledRect(x + r / 2, y + r / 2, w - r, h - r);
-
-  // Inner frame
-  ctx.strokeStyle = backgroundColor;
-  ctx.strokeRect(
-    x + r / 2 + thickness,
-    y + r / 2 + thickness,
-    w - r - thickness * 2,
-    h - r - thickness * 2
-  );
-  ctx.fillStyle = backgroundColor;
-  DrawFilledRect(
-    x + r / 2 + thickness,
-    y + r / 2 + thickness,
-    w - r - thickness * 2,
-    h - r - thickness * 2
-  );
 };
 
-// Draw a filled rectangle.
-function DrawFilledRect(x, y, w, h) {
+// Draw a rectangle.
+const DrawRect = (x, y, w, h, color, filled = true) => {
   x = Math.floor(x / 1);
   y = Math.floor(y / 1);
   w = Math.floor(w / 1);
   h = Math.floor(h / 1);
 
   const canvasCtx = getState().canvas.getContext('2d');
-  canvasCtx.fillRect(x, y, w, h);
-}
+  if (filled) {
+    if (color) {
+      canvasCtx.fillStyle = color;
+    }
+
+    canvasCtx.fillRect(x, y, w, h);
+  } else {
+    if (color) {
+      canvasCtx.strokeStyle = color;
+    }
+
+    canvasCtx.rect(x, y, w, h);
+  }
+};
 
 // A single frame of animation.
 window.requestAnimFrame = (() => {

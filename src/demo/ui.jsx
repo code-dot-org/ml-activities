@@ -5,18 +5,24 @@ import _ from 'lodash';
 import {getState, setState} from './state';
 import constants, {AppMode, Modes} from './constants';
 import {toMode} from './toMode';
-import {$time, currentRunTime, finishMovement} from './helpers';
+import {$time, currentRunTime, finishMovement, resetTraining} from './helpers';
 import {onClassifyFish} from './models/train';
 import colors from './colors';
 import aiBotClosed from '../../public/images/ai-bot/ai-bot-closed.png';
+import counterIcon from '../../public/images/data.png';
+import eraseButton from '../../public/images/erase.png';
+import arrowDownImage from '../../public/images/arrow-down.png';
+import snail from '../../public/images/seaCreatures/Snail.png';
 import Typist from 'react-typist';
 import {getCurrentGuide, dismissCurrentGuide} from './models/guide';
+import {playSound} from './models/soundLibrary';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {
   faPlay,
   faPause,
   faBackward,
-  faForward
+  faForward,
+  faEraser
 } from '@fortawesome/free-solid-svg-icons';
 
 import {downloadFish} from '../utils/downloadFishImages';
@@ -41,22 +47,40 @@ const styles = {
     borderRadius: 8,
     minWidth: 160,
     outline: 'none',
-    border: `2px solid ${colors.black}`,
+    border: 'none',
     ':focus': {
       outline: `${colors.white} auto 5px`
     }
   },
   continueButton: {
     position: 'absolute',
-    bottom: 10,
-    right: 10,
+    bottom: '4%',
+    right: '2.25%',
     backgroundColor: colors.orange,
     color: colors.white
   },
-  backButton: {
+  finishButton: {
+    backgroundColor: colors.orange,
+    color: colors.white
+  },
+  playAgainButton: {
+    backgroundColor: colors.yellowGreen,
+    color: colors.white,
+    marginBottom: 10
+  },
+  rightButtons: {
     position: 'absolute',
     bottom: 10,
-    left: 10,
+    right: 10,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'right',
+    minWidth: 160
+  },
+  backButton: {
+    position: 'absolute',
+    bottom: '4%',
+    left: '2.25%',
     backgroundColor: colors.blue,
     color: colors.white
   },
@@ -71,6 +95,62 @@ const styles = {
     marginLeft: '6%',
     marginRight: '6%',
     marginTop: '2%'
+  },
+  confirmationDialogBackground: {
+    backgroundColor: colors.transparentBlack,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    borderRadius: 10,
+    zPosition: 1
+  },
+  confirmationDialog: {
+    position: 'absolute',
+    backgroundColor: colors.white,
+    color: colors.darkGrey,
+    transform: 'translate(-50%, -50%)',
+    top: '50%',
+    bottom: 'initial',
+    left: '50%',
+    padding: 20
+  },
+  confirmationDialogLeft: {
+    float: 'left',
+    width: '30%'
+  },
+  confirmationDialogRight: {
+    float: 'right',
+    width: '70%'
+  },
+  confirmationHeader: {
+    fontSize: 40,
+    lineHeight: '40px',
+    color: colors.darkGrey,
+    padding: 10,
+    textAlign: 'center'
+  },
+  confirmationText: {
+    textAlign: 'center',
+    backgroundColor: colors.lightGrey,
+    padding: '15px',
+    borderRadius: '5px'
+  },
+  confirmationButtons: {
+    display: 'inline-flex',
+    justifyContent: 'space-between',
+    padding: '10px 0px',
+    width: '100%'
+  },
+  confirmationYesButton: {
+    marginLeft: 10,
+    backgroundColor: colors.red,
+    color: colors.white
+  },
+  confirmationNoButton: {
+    backgroundColor: colors.orange,
+    color: colors.white
   },
   activityIntroText: {
     position: 'absolute',
@@ -98,7 +178,14 @@ const styles = {
     textAlign: 'center',
     marginTop: 20,
     fontSize: 22,
-    lineHeight: '26px'
+    lineHeight: '26px',
+    color: colors.white
+  },
+  eraseButton: {
+    position: 'absolute',
+    top: 24,
+    right: 22,
+    cursor: 'pointer'
   },
   trainQuestionText: {
     position: 'absolute',
@@ -106,11 +193,12 @@ const styles = {
     left: '50%',
     transform: 'translateX(-50%)',
     fontSize: 32,
-    lineHeight: '35px'
+    lineHeight: '35px',
+    color: colors.white
   },
   trainButtons: {
     position: 'absolute',
-    top: '80%',
+    top: '83%',
     width: '100%',
     display: 'flex',
     justifyContent: 'center'
@@ -120,12 +208,18 @@ const styles = {
     ':hover': {
       backgroundColor: colors.green,
       color: colors.white
+    },
+    ':focus': {
+      outline: 'none'
     }
   },
   trainButtonNo: {
     ':hover': {
       backgroundColor: colors.red,
       color: colors.white
+    },
+    ':focus': {
+      outline: 'none'
     }
   },
   trainBot: {
@@ -133,6 +227,24 @@ const styles = {
     height: '40%',
     top: '28%',
     left: '76%'
+  },
+  counter: {
+    position: 'absolute',
+    display: 'flex',
+    justifyContent: 'space-between',
+    right: 53,
+    top: 24,
+    backgroundColor: colors.black,
+    opacity: '90%',
+    color: colors.neonBlue,
+    borderRadius: 33,
+    padding: 0,
+    width: '8%',
+    height: 25
+  },
+  counterNum: {
+    fontSize: 14,
+    margin: '4px 7px'
   },
   mediaControls: {
     position: 'absolute',
@@ -144,19 +256,19 @@ const styles = {
   mediaControl: {
     cursor: 'pointer',
     margin: '0 20px',
-    fontSize: 42,
-    color: colors.grey,
+    fontSize: 30,
+    color: colors.white,
     display: 'flex',
     alignItems: 'center',
     ':hover': {
       color: colors.orange
     },
     ':active': {
-      color: colors.black
+      color: colors.orange
     }
   },
   selectedControl: {
-    color: colors.black
+    color: colors.orange
   },
   timeScale: {
     width: 40,
@@ -178,11 +290,12 @@ const styles = {
   },
   pondBot: {
     position: 'absolute',
-    height: '40%',
-    top: '23%',
+    height: '27%',
+    top: '59%',
     left: '50%',
     bottom: 0,
-    transform: 'translateX(-45%)'
+    transform: 'translateX(-45%)',
+    pointerEvents: 'none'
   },
   pill: {
     display: 'flex',
@@ -211,30 +324,44 @@ const styles = {
   },
   guide: {
     position: 'absolute',
-    backgroundColor: colors.black,
+    backgroundColor: colors.transparentBlack,
     color: colors.white,
-    textAlign: 'center',
-    lineHeight: '140%'
+    lineHeight: '140%',
+    borderRadius: 5,
+    maxWidth: '80%',
+    bottom: '4%',
+    left: '50%',
+    transform: 'translateX(-50%)'
   },
   guideLeft: {
     float: 'left'
   },
   guideRight: {
-    float: 'right'
+    float: 'right',
+    position: 'relative'
   },
   guideImage: {
-    width: '70%',
-    paddingTop: 15
+    paddingTop: 20,
+    paddingLeft: 20,
+    maxWidth: '90%'
+  },
+  guideHeading: {
+    fontSize: 40,
+    lineHeight: '40px',
+    color: colors.darkGrey,
+    padding: 20
   },
   guideTypingText: {
     position: 'absolute',
-    padding: 15
+    padding: 20
+  },
+  guideFinalTextContainer: {},
+  guideFinalTextInfoContainer: {
+    backgroundColor: colors.lightGrey,
+    borderRadius: 10
   },
   guideFinalText: {
-    padding: 15,
-    color: colors.white,
-    textAlign: 'center',
-    lineHeight: '140%',
+    padding: 20,
     opacity: 0
   },
   guideBackground: {
@@ -244,8 +371,7 @@ const styles = {
     left: 0,
     width: '100%',
     height: '100%',
-    borderRadius: 10,
-    border: '2px solid transparent'
+    borderRadius: 10
   },
   guideBackgroundHidden: {
     position: 'absolute',
@@ -256,67 +382,44 @@ const styles = {
     pointerEvents: 'none'
   },
   guideArrow: {
-    top: '100%',
-    left: '50%',
-    border: 'solid transparent',
-    height: 0,
-    width: 0,
-    position: 'absolute',
-    pointerEvents: 'none',
-    borderColor: 'none',
-    borderTopColor: colors.black,
-    borderWidth: 30,
-    marginLeft: -30
+    position: 'absolute'
   },
-  guideTopLeft: {
-    top: '5%',
-    left: '5%'
+  guideInfo: {
+    backgroundColor: colors.white,
+    color: colors.darkGrey,
+    transform: 'translate(-50%, -50%)',
+    top: '50%',
+    bottom: 'initial',
+    left: '50%',
+    padding: 20
   },
   guideCenter: {
-    bottom: '40%',
+    top: '50%',
     left: '50%',
+    bottom: 'initial',
     maxWidth: '47%',
-    transform: 'translateX(-50%)'
+    transform: 'translate(-50%, -50%)'
   },
-  guideRightCenter: {
-    bottom: '30%',
-    right: '5%',
-    maxWidth: '25%'
-  },
-  guideTopRight: {
+  arrowBotRight: {
     top: '15%',
-    right: '13%'
+    right: '14.5%'
   },
-  guideTopRightNarrow: {
-    top: '15%',
-    right: '2%',
-    maxWidth: '40%'
+  arrowLowerLeft: {
+    bottom: '17%',
+    left: '6%'
   },
-  guideBottomMiddle: {
+  arrowLowerRight: {
+    bottom: '17%',
+    right: '6%'
+  },
+  arrowLowishRight: {
+    bottom: '25%',
+    right: '5%'
+  },
+  arrowLowerCenter: {
     bottom: '25%',
     left: '50%',
     transform: 'translateX(-50%)'
-  },
-  guideBottomRight: {
-    bottom: '18%',
-    right: '2%',
-    maxWidth: '25%'
-  },
-  guideBottomLeft: {
-    bottom: '18%',
-    left: '2%',
-    maxWidth: '25%'
-  },
-  guideBottomRightCenter: {
-    bottom: '20%',
-    right: '5%',
-    maxWidth: '25%'
-  },
-  guideButton: {
-    padding: 5,
-    minWidth: 100,
-    marginTop: 20,
-    right: 0
   }
 };
 
@@ -366,12 +469,21 @@ let Button = class Button extends React.Component {
     className: PropTypes.string,
     style: PropTypes.object,
     children: PropTypes.node,
-    onClick: PropTypes.func
+    onClick: PropTypes.func,
+    sound: PropTypes.string
   };
 
   onClick(event) {
     dismissCurrentGuide();
-    this.props.onClick(event);
+    const clickReturnValue = this.props.onClick(event);
+
+    if (clickReturnValue !== false) {
+      if (this.props.sound && clickReturnValue !== false) {
+        playSound(this.props.sound);
+      } else {
+        playSound('other');
+      }
+    }
   }
 
   render() {
@@ -388,6 +500,52 @@ let Button = class Button extends React.Component {
   }
 };
 Button = Radium(Button);
+
+let ConfirmationDialog = class ConfirmationDialog extends React.Component {
+  static propTypes = {
+    onYesClick: PropTypes.func,
+    onNoClick: PropTypes.func
+  };
+
+  render() {
+    return (
+      <div style={styles.confirmationDialogBackground}>
+        <div style={styles.confirmationDialog}>
+          <img src={snail} style={styles.confirmationDialogLeft} />
+          <div style={styles.confirmationDialogRight}>
+            <div
+              style={styles.confirmationHeader}
+              className="confirmation-text"
+            >
+              Are you sure?
+            </div>
+            <div style={styles.confirmationText}>
+              Erasing AI's data will permanently delete all training. Is that
+              what you want to do?
+            </div>
+          </div>
+          <div style={styles.confirmationButtons}>
+            <Button
+              onClick={this.props.onYesClick}
+              style={styles.confirmationYesButton}
+              className="dialog-button"
+            >
+              <FontAwesomeIcon icon={faEraser} /> Erase
+            </Button>
+            <Button
+              onClick={this.props.onNoClick}
+              style={styles.confirmationNoButton}
+              className="dialog-button"
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+};
+ConfirmationDialog = Radium(ConfirmationDialog);
 
 const wordSet = {
   short: {
@@ -494,20 +652,48 @@ let Train = class Train extends React.Component {
       state.appMode === AppMode.CreaturesVTrash ? 'Yes' : state.word;
     const noButtonText =
       state.appMode === AppMode.CreaturesVTrash ? 'No' : `Not ${state.word}`;
+    const resetTrainingFunction = () => {
+      resetTraining(state);
+      setState({showConfirmationDialog: false});
+    };
+
     return (
       <Body>
+        <img
+          src={eraseButton}
+          style={styles.eraseButton}
+          onClick={() => {
+            setState({
+              showConfirmationDialog: true,
+              confirmationDialogOnYes: resetTrainingFunction
+            });
+          }}
+        />
         <div style={styles.trainQuestionText}>{state.trainingQuestion}</div>
         <img style={styles.trainBot} src={aiBotClosed} />
+
+        <div style={styles.counter}>
+          <img src={counterIcon} />
+          <span style={styles.counterNum}>
+            {Math.min(999, state.yesCount + state.noCount)}
+          </span>
+        </div>
         <div style={styles.trainButtons}>
           <Button
             style={styles.trainButtonNo}
-            onClick={() => onClassifyFish(false)}
+            onClick={() => {
+              return onClassifyFish(false);
+            }}
+            sound={'no'}
           >
             {noButtonText}
           </Button>
           <Button
             style={styles.trainButtonYes}
-            onClick={() => onClassifyFish(true)}
+            onClick={() => {
+              return onClassifyFish(true);
+            }}
+            sound={'yes'}
           >
             {yesButtonText}
           </Button>
@@ -672,10 +858,27 @@ let Predict = class Predict extends React.Component {
 Predict = Radium(Predict);
 
 class Pond extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
   onPondClick(e) {
+    // Don't allow pond clicks if a Guide is currently showing.
+    if (getCurrentGuide()) {
+      return;
+    }
+
     const state = getState();
     const clickX = e.nativeEvent.offsetX;
     const clickY = e.nativeEvent.offsetY;
+
+    const boundingRect = e.target.getBoundingClientRect();
+    const pondWidth = boundingRect.width;
+    const pondHeight = boundingRect.height;
+
+    // Scale the click to the pond canvas dimensions.
+    const normalizedClickX = (clickX / pondWidth) * constants.canvasWidth;
+    const normalizedClickY = (clickY / pondHeight) * constants.canvasHeight;
 
     if (state.pondFishBounds) {
       let fishClicked = false;
@@ -696,8 +899,8 @@ class Pond extends React.Component {
             fishBound.y,
             fishBound.w,
             fishBound.h,
-            clickX,
-            clickY,
+            normalizedClickX,
+            normalizedClickY,
             1,
             1
           )
@@ -706,17 +909,17 @@ class Pond extends React.Component {
             pondClickedFish: {
               id: fishBound.fishId,
               x: fishBound.x,
-              y: fishBound.y,
-              confidence: fishBound.confidence
+              y: fishBound.y
             }
           });
-          console.log('Fish clicked confidence: ', fishBound.confidence);
           fishClicked = true;
+          playSound('yes');
         }
       });
 
       if (!fishClicked) {
         setState({pondClickedFish: null});
+        playSound('no');
       }
     }
   }
@@ -724,64 +927,47 @@ class Pond extends React.Component {
   render() {
     const state = getState();
 
-    const showFishDetails = !!state.pondClickedFish;
-    let pondFishDetailsStyle;
-    let confidence;
-    if (showFishDetails) {
-      const fish = state.pondClickedFish;
-
-      const leftX = Math.min(
-        Math.max(state.pondClickedFish.x + 200, 20),
-        constants.canvasWidth - 210
-      );
-      const topY = Math.min(
-        Math.max(state.pondClickedFish.y, 20),
-        constants.canvasHeight - 50
-      );
-
-      pondFishDetailsStyle = {
-        ...styles.pondFishDetails,
-        left: leftX,
-        top: topY
-      };
-
-      if (!fish.confidence || !fish.confidence.confidencesByClassId) {
-        confidence = 'Not confident';
-      } else if (fish.confidence.confidencesByClassId[0] > 0.99) {
-        confidence = 'Very confident';
-      } else if (fish.confidence.confidencesByClassId[0] > 0.5) {
-        confidence = 'Fairly confident';
-      } else {
-        confidence = 'Not very confident';
-      }
-    }
-
     return (
-      <Body onClick={this.onPondClick}>
+      <Body onClick={e => this.onPondClick(e)}>
         <img style={styles.pondBot} src={aiBotClosed} />
-        {showFishDetails && (
-          <div style={pondFishDetailsStyle}>{confidence}</div>
-        )}
         {state.canSkipPond && (
           <div>
-            <Button
-              style={styles.continueButton}
-              onClick={() => {
-                if (state.onContinue) {
-                  state.onContinue();
-                }
-              }}
-            >
-              Continue
-            </Button>
-            <Button
-              style={styles.backButton}
-              onClick={() => {
-                toMode(Modes.Training);
-              }}
-            >
-              Train More
-            </Button>
+            {state.appMode === AppMode.FishLong ? (
+              <div style={styles.rightButtons}>
+                <Button
+                  style={styles.playAgainButton}
+                  onClick={() => {
+                    resetTraining();
+                    toMode(Modes.Words);
+                  }}
+                >
+                  Play Again
+                </Button>
+                <Button
+                  style={styles.finishButton}
+                  onClick={state.onContinue()}
+                >
+                  Finish
+                </Button>
+              </div>
+            ) : (
+              <Button
+                style={styles.continueButton}
+                onClick={() => state.onContinue()}
+              >
+                Continue
+              </Button>
+            )}
+            <div>
+              <Button
+                style={styles.backButton}
+                onClick={() => {
+                  toMode(Modes.Training);
+                }}
+              >
+                Train More
+              </Button>
+            </div>
           </div>
         )}
       </Body>
@@ -792,6 +978,13 @@ class Pond extends React.Component {
 class Guide extends React.Component {
   onShowing() {
     setState({guideShowing: true});
+  }
+
+  dismissGuideClick() {
+    const dismissed = dismissCurrentGuide();
+    if (dismissed) {
+      playSound('other');
+    }
   }
 
   render() {
@@ -810,49 +1003,71 @@ class Guide extends React.Component {
     return (
       <div>
         {!!currentGuide && (
-          <div
-            key={currentGuide.id}
-            style={
-              currentGuide.hideBackground
-                ? styles.guideBackgroundHidden
-                : styles.guideBackground
-            }
-            onClick={dismissCurrentGuide}
-          >
+          <div>
             <div
-              style={{...styles.guide, ...styles[`guide${currentGuide.style}`]}}
+              key={currentGuide.id}
+              style={
+                currentGuide.noDimBackground
+                  ? styles.guideBackgroundHidden
+                  : styles.guideBackground
+              }
+              onClick={this.dismissGuideClick}
             >
-              {currentGuide.image && (
-                <div style={{...styles.guideLeft, width: leftWidth}}>
-                  <img src={currentGuide.image} style={styles.guideImage} />
-                </div>
-              )}
+              <div
+                style={{
+                  ...styles.guide,
+                  ...styles[`guide${currentGuide.style}`]
+                }}
+              >
+                {currentGuide.image && (
+                  <div style={{...styles.guideLeft, width: leftWidth}}>
+                    <img src={currentGuide.image} style={styles.guideImage} />
+                  </div>
+                )}
 
-              <div style={{...styles.guideRight, width: rightWidth}}>
-                <div style={styles.guideTypingText}>
-                  <Typist
-                    avgTypingDelay={35}
-                    stdTypingDelay={15}
-                    cursor={{show: false}}
-                    onTypingDone={this.onShowing}
+                <div style={{...styles.guideRight, width: rightWidth}}>
+                  {currentGuide.heading && (
+                    <div style={styles.guideHeading}>
+                      {currentGuide.heading}
+                    </div>
+                  )}
+                  <div style={styles.guideTypingText}>
+                    <Typist
+                      avgTypingDelay={35}
+                      stdTypingDelay={15}
+                      cursor={{show: false}}
+                      onTypingDone={this.onShowing}
+                    >
+                      {currentGuide.textFn
+                        ? currentGuide.textFn(getState())
+                        : currentGuide.text}
+                    </Typist>
+                  </div>
+                  <div
+                    style={
+                      currentGuide.style === 'Info'
+                        ? styles.guideFinalTextInfoContainer
+                        : styles.guideFinalTextContainer
+                    }
                   >
-                    {currentGuide.textFn
-                      ? currentGuide.textFn(getState())
-                      : currentGuide.text}
-                  </Typist>
-                </div>
-                <div style={styles.guideFinalText}>
-                  {currentGuide.textFn
-                    ? currentGuide.textFn(getState())
-                    : currentGuide.text}
+                    <div style={styles.guideFinalText}>
+                      {currentGuide.textFn
+                        ? currentGuide.textFn(getState())
+                        : currentGuide.text}
+                    </div>
+                  </div>
                 </div>
               </div>
-              {getState().guideShowing && currentGuide.arrow !== 'none' && (
-                <div>
-                  <div style={styles.guideArrow}> </div>
-                </div>
-              )}
             </div>
+            {currentGuide.arrow && (
+              <img
+                src={arrowDownImage}
+                style={{
+                  ...styles.guideArrow,
+                  ...styles[`arrow${currentGuide.arrow}`]
+                }}
+              />
+            )}
           </div>
         )}
       </div>
@@ -861,7 +1076,12 @@ class Guide extends React.Component {
 }
 
 export default class UI extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
   render() {
+    const state = getState();
     const currentMode = getState().currentMode;
 
     return (
@@ -870,6 +1090,12 @@ export default class UI extends React.Component {
         {currentMode === Modes.Training && <Train />}
         {currentMode === Modes.Predicting && <Predict />}
         {currentMode === Modes.Pond && <Pond />}
+        {state.showConfirmationDialog && (
+          <ConfirmationDialog
+            onYesClick={state.confirmationDialogOnYes}
+            onNoClick={() => setState({showConfirmationDialog: false})}
+          />
+        )}
       </div>
     );
   }
