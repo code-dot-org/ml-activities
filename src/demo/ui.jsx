@@ -7,6 +7,7 @@ import constants, {AppMode, Modes} from './constants';
 import {toMode} from './toMode';
 import {$time, currentRunTime, finishMovement, resetTraining} from './helpers';
 import {onClassifyFish} from './models/train';
+import {arrangeFish} from './models/pond';
 import colors from './colors';
 import aiBotClosed from '../../public/images/ai-bot/ai-bot-closed.png';
 import counterIcon from '../../public/images/data.png';
@@ -22,7 +23,9 @@ import {
   faPause,
   faBackward,
   faForward,
-  faEraser
+  faEraser,
+  faCheck,
+  faBan
 } from '@fortawesome/free-solid-svg-icons';
 
 import {downloadFish} from '../utils/downloadFishImages';
@@ -44,6 +47,7 @@ const styles = {
   button: {
     cursor: 'pointer',
     backgroundColor: colors.white,
+    color: colors.grey,
     borderRadius: 8,
     minWidth: 160,
     outline: 'none',
@@ -296,6 +300,30 @@ const styles = {
     bottom: 0,
     transform: 'translateX(-45%)',
     pointerEvents: 'none'
+  },
+  recallContainer: {
+    position: 'absolute',
+    top: '4%',
+    right: '2.25%',
+    color: colors.white,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
+  recallIcon: {
+    width: 30,
+    height: 30,
+    border: `5px solid ${colors.white}`,
+    borderRadius: 50,
+    padding: 6,
+    marginLeft: 8,
+    backgroundColor: colors.lightGrey
+  },
+  bgRed: {
+    backgroundColor: colors.red
+  },
+  bgGreen: {
+    backgroundColor: colors.green
   },
   pill: {
     display: 'flex',
@@ -857,12 +885,25 @@ let Predict = class Predict extends React.Component {
 };
 Predict = Radium(Predict);
 
-class Pond extends React.Component {
+let Pond = class Pond extends React.Component {
   constructor(props) {
     super(props);
   }
 
-  onPondClick(e) {
+  toggleRecall = () => {
+    const state = getState();
+    const showRecallFish = !state.showRecallFish;
+    const fish = showRecallFish ? state.recallFish : state.pondFish;
+
+    // Don't call arrangeFish if fish have already been arranged.
+    if (fish.length > 0 && !fish[0].getXY()) {
+      arrangeFish(fish);
+    }
+
+    setState({showRecallFish});
+  };
+
+  onPondClick = e => {
     // Don't allow pond clicks if a Guide is currently showing.
     if (getCurrentGuide()) {
       return;
@@ -922,13 +963,32 @@ class Pond extends React.Component {
         playSound('no');
       }
     }
-  }
+  };
 
   render() {
     const state = getState();
 
     return (
-      <Body onClick={e => this.onPondClick(e)}>
+      <Body onClick={this.onPondClick}>
+        <div style={styles.recallContainer}>
+          Show
+          <FontAwesomeIcon
+            icon={faCheck}
+            style={{
+              ...styles.recallIcon,
+              ...(!state.showRecallFish ? styles.bgGreen : {})
+            }}
+            onClick={this.toggleRecall}
+          />
+          <FontAwesomeIcon
+            icon={faBan}
+            style={{
+              ...styles.recallIcon,
+              ...(state.showRecallFish ? styles.bgRed : {})
+            }}
+            onClick={this.toggleRecall}
+          />
+        </div>
         <img style={styles.pondBot} src={aiBotClosed} />
         {state.canSkipPond && (
           <div>
@@ -937,7 +997,7 @@ class Pond extends React.Component {
                 <Button
                   style={styles.playAgainButton}
                   onClick={() => {
-                    resetTraining();
+                    resetTraining(state);
                     toMode(Modes.Words);
                   }}
                 >
@@ -973,7 +1033,8 @@ class Pond extends React.Component {
       </Body>
     );
   }
-}
+};
+Pond = Radium(Pond);
 
 class Guide extends React.Component {
   onShowing() {
