@@ -4,8 +4,7 @@ export const downloadFish = (ocean, filename) => {
   const canvas = document.createElement('canvas');
   canvas.width = 310 * 10;
   canvas.height = 210 * 10;
-  canvas.getContext('2d').fillStyle = '#D9D9D9';
-  canvas.getContext('2d').fillRect(0, 0, canvas.width, canvas.height);
+  canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
 
   var i = 0;
   ocean.forEach(fish => {
