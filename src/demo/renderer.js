@@ -6,8 +6,11 @@ import {
   backgroundPathForMode,
   finishMovement,
   currentRunTime,
+  randomInt,
+  filterFishComponents,
   $time
 } from './helpers';
+import {fishData} from '../utils/fishData';
 import colors from './colors';
 import {predictFish} from './models/predict';
 import {
@@ -66,6 +69,12 @@ export const initRenderer = () => {
 // Render a single frame of the scene.
 // Sometimes performs special rendering actions, such as when mode has changed.
 export const render = () => {
+  // Set up the next call to the renderer.  One advantage of doing it here is
+  // that if any exceptions occur, we will have still scheduled the next render.
+  // Otherwise, any exception that occurs would prevent any more renders from
+  // happening.
+  window.requestAnimFrame(render);
+
   let state = getState();
 
   if (state.currentMode !== prevState.currentMode) {
@@ -113,6 +122,9 @@ export const render = () => {
   const timeBeforeCanSkipPond = 5000;
 
   switch (state.currentMode) {
+    case Modes.Words:
+      drawWordFishImages();
+      break;
     case Modes.Training:
       drawPolaroidFrame(state.canvas);
       drawMovingFish(state);
@@ -150,7 +162,6 @@ export const render = () => {
   drawOverlays();
 
   prevState = {...state};
-  window.requestAnimFrame(render);
 };
 
 // Load and display the background image onto the background canvas.
@@ -303,7 +314,7 @@ const drawMovingFish = state => {
 
   const maxScreenX =
     state.currentMode === Modes.Training
-      ? constants.canvasWidth - 100
+      ? constants.canvasWidth - 65
       : constants.canvasWidth + constants.fishCanvasWidth;
   const startFishIdx = Math.max(
     getFishIdxForLocation(maxScreenX, offsetX, state.fishData.length),
@@ -314,12 +325,13 @@ const drawMovingFish = state => {
     state.fishData.length - 1
   );
   const ctx = state.canvas.getContext('2d');
+  const midScreenX = constants.canvasWidth / 2 - constants.fishCanvasWidth / 2;
 
   let centerFish;
   for (let i = startFishIdx; i <= lastFishIdx; i++) {
     const fish = state.fishData[i];
     const x = getXForFish(state.fishData.length - 1, i, offsetX);
-    const y = getYForFish(
+    let y = getYForFish(
       state.fishData.length - 1,
       i,
       state,
@@ -330,8 +342,6 @@ const drawMovingFish = state => {
     let drawPrediction = false;
     if (state.currentMode === Modes.Predicting) {
       if (fish.getResult()) {
-        const midScreenX =
-          constants.canvasWidth / 2 - constants.fishCanvasWidth / 2;
         drawPrediction = x >= midScreenX;
         const nearCenterX = x - midScreenX <= 50;
 
@@ -364,7 +374,14 @@ const drawMovingFish = state => {
     }
 
     const drawPolaroid = state.currentMode === Modes.Training;
-    drawSingleFish(fish, x, y, ctx, 1, drawPrediction, drawPolaroid);
+    let size = 1;
+    if (drawPolaroid && state.isRunning && x > midScreenX) {
+      size = 0.35;
+      // Apply sine wave to y-value to make item jump into AI bot's head.
+      y -= Math.sin((runtime / state.moveTime) * Math.PI) * 200;
+    }
+
+    drawSingleFish(fish, x, y, ctx, size, drawPrediction, drawPolaroid);
   }
 
   if (state.currentMode === Modes.Predicting) {
@@ -392,19 +409,21 @@ const drawPolaroidFrame = canvas => {
   }
 };
 
-const drawPolaroid = (ctx, x, y) => {
-  const rectSize = constants.fishFrameSize;
-  const xDiff = Math.abs(rectSize - constants.fishCanvasWidth) / 2;
+const drawPolaroid = (ctx, x, y, size = 1) => {
+  const rectSize = constants.fishFrameSize * size;
+  const xDiff = Math.abs(rectSize - constants.fishCanvasWidth * size) / 2;
   const adjustedX = x + xDiff;
-  const yDiff = Math.abs(rectSize - constants.fishCanvasHeight) / 2;
+  const yDiff = Math.abs(rectSize - constants.fishCanvasHeight * size) / 2;
   const adjustedY = y - yDiff;
 
   // White outer polaroid frame
+  const padding = 10 * size;
+  const paddingBottom = 60 * size;
   DrawRect(
-    adjustedX - 10,
-    adjustedY - 10,
-    rectSize + 20,
-    rectSize + 60,
+    adjustedX - padding,
+    adjustedY - padding,
+    rectSize + padding * 2,
+    rectSize + paddingBottom,
     colors.white
   );
   // Dark grey inner polaroid frame (where item is displayed)
@@ -493,37 +512,134 @@ const drawPredictBot = state => {
   ctx.drawImage(botImg, botX, botY);
 };
 
+const drawWordFishImages = () => {
+  const canvas = getState().canvas;
+  const ctx = canvas.getContext('2d');
+  const state = getState();
+
+  const fishScale = 0.7;
+
+  const t = $time();
+  state.wordFish.forEach(fish => {
+    const swayValue = ((t * 360) / (20 * 1000)) % 360;
+    const swayOffsetY = Math.sin(((swayValue * Math.PI) / 180) * 3) / 20;
+
+    const xy = fish.getXY();
+    if (!fish.startTime) {
+      fish.startTime = t;
+      fish.speed = randomInt(10000, 15000);
+    }
+    let finalX;
+    if (fish.faceLeft) {
+      finalX =
+        constants.canvasWidth +
+        constants.fishCanvasWidth -
+        (constants.canvasWidth / fish.speed) * (t - fish.startTime);
+    } else {
+      finalX =
+        (constants.canvasWidth / fish.speed) * (t - fish.startTime) -
+        constants.fishCanvasWidth;
+    }
+    const finalY = xy.y + swayOffsetY;
+    fish.setXY({x: finalX, y: finalY});
+
+    drawSingleFish(fish, finalX, finalY, ctx, fishScale);
+  });
+
+  let wordFish = state.wordFish;
+  wordFish = wordFish.filter(
+    f =>
+      f.xy.x <= (constants.canvasWidth + constants.fishCanvasWidth) &&
+      f.xy.x >= -constants.fishCanvasWidth
+  );
+  const lastFish = wordFish[wordFish.length - 1];
+
+  if (
+    wordFish.length <= 1 ||
+    (wordFish.length <= 10 &&
+      lastFish.startTime > t &&
+      randomInt(0, wordFish.length * 500) <= 0)
+  ) {
+    const possibleFishComponents = filterFishComponents(
+    fishData,
+    state.appMode
+  );
+    const newFish = new FishOceanObject(state.fishCount,possibleFishComponents);
+    newFish.randomize();
+    const lane = randomInt(
+      0,
+      Math.floor(constants.canvasHeight / (fishScale * constants.fishCanvasHeight)) - 1
+    );
+    const y = lane * constants.fishCanvasHeight * fishScale;
+    newFish.setXY({x: -constants.fishCanvasWidth * 1.5, y});
+    newFish.faceLeft = lane % 2 === 0 ? true : false;
+    wordFish.push(newFish);
+    setState({fishCount: state.fishCount + 1});
+  }
+  setState({wordFish});
+};
+
+const pondFishTransitionTime = 1500;
+const totalPondFishXOffset = 1000;
 // Draw the fish for pond mode.
 const drawPondFishImages = () => {
   const state = getState();
   const ctx = state.canvas.getContext('2d');
   const fishes = state.showRecallFish ? state.recallFish : state.pondFish;
+
+  let transitionOffset = 0;
+  if (state.pondFishTransitionStartTime) {
+    const t = $time() - state.pondFishTransitionStartTime;
+    transitionOffset = (t / pondFishTransitionTime) * totalPondFishXOffset;
+
+    if (t > pondFishTransitionTime) {
+      setState({
+        showRecallFish: !state.showRecallFish,
+        pondFishTransitionStartTime: null
+      });
+    }
+  }
+
   const fishBounds = [];
 
-  fishes.forEach(fish => {
-    const pondClickedFish = getState().pondClickedFish;
-    const pondClickedFishUs = pondClickedFish && fish.id === pondClickedFish.id;
+  // Draw all the unclicked fish first, then the clicked fish.
+  [false, true].forEach(drawClickedFish => {
+    fishes.forEach(fish => {
+      const pondClickedFish = getState().pondClickedFish;
+      const pondClickedFishUs = !!(
+        pondClickedFish && fish.id === pondClickedFish.id
+      );
 
-    const swayValue =
-      (($time() * 360) / (20 * 1000) + (fish.getId() + 1) * 10) % 360;
-    const swayOffsetX = Math.sin(((swayValue * Math.PI) / 180) * 2) * 25;
-    const swayOffsetY = Math.sin(((swayValue * Math.PI) / 180) * 6) * 2;
+      if (drawClickedFish === pondClickedFishUs) {
+        const swayValue =
+          (($time() * 360) / (20 * 1000) + (fish.getId() + 1) * 10) % 360;
+        let swayOffsetX = Math.sin(((swayValue * Math.PI) / 180) * 2) * 25;
+        let swayOffsetY = Math.sin(((swayValue * Math.PI) / 180) * 6) * 2;
 
-    const xy = fish.getXY();
-    const finalX = xy.x + swayOffsetX;
-    const finalY = xy.y + swayOffsetY;
+        // Add some variation to fish movement if transition is in progress.
+        if (transitionOffset > 0 && fish.getId() % 2 === 0) {
+          swayOffsetX *= 2;
+          swayOffsetY *= 5;
+        }
 
-    const size = pondClickedFishUs ? 1 : 0.5;
+        const xy = fish.getXY();
+        const finalX = xy.x + swayOffsetX + transitionOffset;
+        const finalY = xy.y + swayOffsetY;
 
-    const fishBound = drawSingleFish(fish, finalX, finalY, ctx, size);
+        const size = pondClickedFishUs ? 1 : 0.5;
 
-    // Record this screen location so that we can separately check for clicks on it.
-    fishBounds.push({
-      fishId: fish.id,
-      ...fishBound
+        const fishBound = drawSingleFish(fish, finalX, finalY, ctx, size);
+
+        // Record this screen location so that we can separately check for clicks on it.
+        fishBounds.push({
+          fishId: fish.id,
+          ...fishBound
+        });
+      }
     });
-    setState({pondFishBounds: fishBounds}, {skipCallback: true});
   });
+
+  setState({pondFishBounds: fishBounds}, {skipCallback: true});
 };
 
 // Draw a single fish, preferably from cached canvas.
@@ -556,7 +672,7 @@ const drawSingleFish = (
   const adjustedFishYPos = fishYPos - height / 2 + fishCanvas.height / 2;
 
   if (withPolaroid) {
-    drawPolaroid(ctx, adjustedFishXPos, adjustedFishYPos);
+    drawPolaroid(ctx, adjustedFishXPos, adjustedFishYPos, size);
   }
 
   if (withPrediction && fish.getResult()) {
