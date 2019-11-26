@@ -10,7 +10,7 @@ const guides = [
   {
     id: 'fishvtrash-training-init1',
     text: `Garbage dumped in the water affects marine life.  In this activity you will “program” or “train” A.I. (artificial intelligence) to identify fish or trash.  Let’s clean up the ocean!`,
-    when: {appMode: AppMode.FishVTrash, currentMode: Modes.Training},
+    when: {appMode: AppMode.FishVTrash, currentMode: Modes.Training}
   },
   {
     id: 'fishvtrash-training-init2',
@@ -120,6 +120,12 @@ const guides = [
       }
     }
   },
+  {
+    id: 'fishvtrash-pond-recall',
+    text: `Switch between “fish” and “not fish” here.`,
+    when: {appMode: AppMode.FishVTrash, currentMode: Modes.Pond},
+    arrow: 'UpperRight'
+  },
   //TODO consider not shwoing the train more and continue guide until the buttons are present on the screen
   {
     id: 'fishvtrash-pond-init2',
@@ -141,12 +147,12 @@ const guides = [
   {
     id: 'creaturesvtrash-predicting-init2',
     text: `What if this training data was used to decide what belonged in the water?`,
-    when: {appMode: AppMode.CreaturesVTrashDemo, currentMode: Modes.Predicting},
+    when: {appMode: AppMode.CreaturesVTrashDemo, currentMode: Modes.Predicting}
   },
   {
     id: 'creaturesvtrash-predicting-init3',
     text: `What would happen to other sea creatures?  Does our training approach cause unintended consequences?`,
-    when: {appMode: AppMode.CreaturesVTrashDemo, currentMode: Modes.Predicting},
+    when: {appMode: AppMode.CreaturesVTrashDemo, currentMode: Modes.Predicting}
   },
   {
     id: 'creaturesvtrash-predicting-init4',
@@ -214,7 +220,7 @@ const guides = [
   },
   {
     id: 'creaturesvtrash-training-init3',
-    text: `The more training data you provide, the more A.I. learns.`,
+    text: `The more training data you provide, the more A.I. learns.  Keep training.`,
     when: {
       appMode: AppMode.CreaturesVTrash,
       currentMode: Modes.Training,
@@ -277,7 +283,8 @@ const guides = [
   },
   {
     id: 'fishshort-words-init1',
-    text: 'AI and machine learning can be used to teach a computer new patterns.',
+    text:
+      'AI and machine learning can be used to teach a computer new patterns.',
     when: {appMode: AppMode.FishShort, currentMode: Modes.Words}
   },
   {
@@ -304,7 +311,7 @@ const guides = [
     textFn: state => {
       return `Based on your training, A.I. identified ${
         state.fishData.length === 1 ? 'this' : 'these'
-      } fish as “${state.word.toLowerCase()}”. How did A.I do?`;
+      } fish as “${state.word.toLowerCase()}”. How did A.I. do?`;
     },
     when: {
       appMode: AppMode.FishShort,
@@ -315,14 +322,32 @@ const guides = [
     }
   },
   {
+    id: 'fishshort-pond-init2',
+    text: 'Click on the info button to see what A.I. learned.',
+    when: {appMode: AppMode.FishShort, currentMode: Modes.Pond},
+    arrow: 'UpperFarRight'
+  },
+  {
     id: 'fishlong-words-init1',
     text: 'Now let’s see if A.I. can learn a less obvious word.',
     when: {appMode: AppMode.FishLong, currentMode: Modes.Words}
   },
   {
     id: 'fishlong-words-init2',
-    text: 'Let’s teach A.I. a word that depends on your opinion.  It’s up to you to pick fish that match your word.',
+    text:
+      'Let’s teach A.I. a word that depends on your opinion.  It’s up to you to pick fish that match your word.',
     when: {appMode: AppMode.FishLong, currentMode: Modes.Words}
+  },
+  {
+    id: 'fishlong-training-question',
+    text: `It is worth asking whether it’s fair to use A.I. to judge a fish by its looks.  A.I. might seem fair and neutral, but all of its analysis is based on its training.`,
+    when: {
+      appMode: AppMode.FishLong,
+      currentMode: Modes.Training,
+      fn: state => {
+        return state.yesCount + state.noCount > 5;
+      }
+    }
   },
   {
     id: 'fishlong-training-many',
