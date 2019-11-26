@@ -259,6 +259,13 @@ export class FishOceanObject extends OceanObject {
   }
 
   drawFishFace(bodyAnchor, ctx) {
+    intermediateCtx.clearRect(
+      0,
+      0,
+      constants.fishCanvasWidth,
+      constants.fishCanvasHeight
+    );
+
     const anchor = this.body.faceAnchor;
 
     const eyeImg = fishPartImages[this.eye.type][this.eye.index];
@@ -267,15 +274,22 @@ export class FishOceanObject extends OceanObject {
     const maxComponentWidth = Math.max(eyeImg.width, mouthImg.width);
     const distBetweenEyeAndMouth = 5;
 
-    ctx.drawImage(
-      eyeImg,
-      bodyAnchor[0] + anchor[0] + (maxComponentWidth - eyeImg.width) / 2,
-      bodyAnchor[1] + anchor[1]
+    intermediateCtx.drawImage(eyeImg, (maxComponentWidth - eyeImg.width) / 2, 0);
+    intermediateCtx.drawImage(
+      mouthImg,
+      (maxComponentWidth - mouthImg.width) / 2,
+      eyeImg.height + distBetweenEyeAndMouth
     );
     ctx.drawImage(
-      mouthImg,
-      bodyAnchor[0] + anchor[0] + (maxComponentWidth - mouthImg.width) / 2,
-      bodyAnchor[1] + anchor[1] + eyeImg.height + distBetweenEyeAndMouth
+      intermediateCanvas,
+      0,
+      0,
+      maxComponentWidth,
+      eyeImg.height + distBetweenEyeAndMouth + mouthImg.height,
+      bodyAnchor[0] + anchor[0],
+      bodyAnchor[1] + anchor[1],
+      maxComponentWidth * 0.9,
+      (eyeImg.height + distBetweenEyeAndMouth + mouthImg.height) * 0.9
     );
   }
 
