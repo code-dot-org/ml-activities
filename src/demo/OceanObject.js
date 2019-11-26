@@ -274,7 +274,7 @@ export class FishOceanObject extends OceanObject {
     const maxComponentWidth = Math.max(eyeImg.width, mouthImg.width);
     const distBetweenEyeAndMouth = 5;
 
-    intermediateCtx.drawImage(eyeImg, 0, 0);
+    intermediateCtx.drawImage(eyeImg, (maxComponentWidth - eyeImg.width) / 2, 0);
     intermediateCtx.drawImage(
       mouthImg,
       (maxComponentWidth - mouthImg.width) / 2,
