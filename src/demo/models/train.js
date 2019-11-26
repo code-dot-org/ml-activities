@@ -41,7 +41,7 @@ export const init = () => {
   });
 
   if (queryStrFor('download') === 'yes') {
-    downloadFish(fishData, `${state.appMode}.png`);
+    downloadFish(fishData, `${state.appMode}`);
   }
 };
 
