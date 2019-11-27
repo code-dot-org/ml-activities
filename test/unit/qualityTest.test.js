@@ -207,7 +207,7 @@ describe('Model quality test', () => {
 
     const bodyData = fishData.bodies;
     const bodyKey = PartKey.BODY;
-    const bodyNames = ['s1', 's2'];
+    const bodyNames = ['s1'];
 
     const mouthIds = Object.entries(mouthData)
       .filter(entry => mouthNames.includes(entry[0]))
