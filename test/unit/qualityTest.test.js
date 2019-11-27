@@ -200,7 +200,7 @@ describe('Model quality test', () => {
   // });
 
   test('test eels with sharp teeth', async () => {
-    const trainSize = 300; // Need more fish to hit enough to train on
+    const trainSize = 500; // Need more fish to hit enough to train on
     const mouthData = fishData.mouths;
     const mouthKey = PartKey.MOUTH;
     const mouthNames = ['mouth3', 'mouth7', 'mouth8'];
