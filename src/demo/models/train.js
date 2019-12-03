@@ -4,6 +4,8 @@ import {ClassType, AppMode} from '../constants';
 import SimpleTrainer from '../../utils/SimpleTrainer';
 import SVMTrainer from '../../utils/SVMTrainer';
 import {generateOcean} from '../../utils/generateOcean';
+import {queryStrFor} from '../helpers';
+import {downloadFish} from '../../utils/downloadFishImages';
 
 export const init = () => {
   const state = getState();
@@ -30,12 +32,17 @@ export const init = () => {
     });
   }
 
+  const fishData = generateOcean(100);
   setState({
-    fishData: generateOcean(100),
+    fishData,
     trainingIndex: 0,
     trainer,
     isRunning: true
   });
+
+  if (queryStrFor('download') === 'yes') {
+    downloadFish(fishData, `${state.appMode}`);
+  }
 };
 
 export const onClassifyFish = doesLike => {
