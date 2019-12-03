@@ -7,7 +7,8 @@ export const downloadFish = (ocean, filename) => {
   canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
 
   var i = 0;
-  ocean.forEach(fish => {
+  const fishToDraw = ocean.slice(0, 100);
+  fishToDraw.forEach(fish => {
     const fishCanvas = document.createElement('canvas');
     fishCanvas.width = 300;
     fishCanvas.height = 200;
