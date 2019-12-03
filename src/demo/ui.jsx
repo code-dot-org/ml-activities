@@ -1536,7 +1536,12 @@ let Guide = class Guide extends React.Component {
                       {currentGuide.heading}
                     </div>
                   )}
-                  <div style={styles.guideTypingText}>
+                  <div
+                    style={[
+                      styles.guideTypingText,
+                      currentGuide.style === 'Info' && {maxWidth: '85%'}
+                    ]}
+                  >
                     <Typist
                       avgTypingDelay={35}
                       stdTypingDelay={15}
