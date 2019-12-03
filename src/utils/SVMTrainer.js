@@ -1,7 +1,7 @@
 const svmjs = require('svm'); // https://github.com/karpathy/svmjs
 import {ClassType} from '../demo/constants'
 
-const SVM_PARAMS = {}; // See https://github.com/karpathy/svmjs/blob/b75b71289dd81fc909a5b3fb8b1caf20fbe45121/lib/svm.js#L27
+const SVM_PARAMS = {maxiter: 500}; // See https://github.com/karpathy/svmjs/blob/b75b71289dd81fc909a5b3fb8b1caf20fbe45121/lib/svm.js#L27
 
 export default class SVMTrainer {
   constructor(converterFn) {
@@ -121,7 +121,7 @@ export default class SVMTrainer {
     for (const fieldWithWeight of idFields) {
       const partType = fieldWithWeight.fieldInfo.partType;
       if (
-        !Object.prototype.hasOwnProperty.call(idFields, partType) ||
+        !Object.prototype.hasOwnProperty.call(idFieldsSummary, partType) ||
         fieldWithWeight.absWeight > idFieldsSummary[partType]
       ) {
         idFieldsSummary[partType] = fieldWithWeight.absWeight;

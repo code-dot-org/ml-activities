@@ -119,7 +119,7 @@ export const render = () => {
   const timeBeforeCanSkipPredict = 5000;
   const timeBeforeCanSkipBiasText = 2000;
   const timeBeforeCanSeePondText = 3000;
-  const timeBeforeCanSkipPond = 5000;
+  const timeBeforeCanSkipPond = 3000;
 
   switch (state.currentMode) {
     case Modes.Words:
@@ -159,7 +159,10 @@ export const render = () => {
       break;
   }
 
-  drawOverlays();
+  // Don't draw overlays on loading screens.
+  if (![Modes.Loading, Modes.IntermediateLoading].includes(state.currentMode)) {
+    drawOverlays();
+  }
 
   prevState = {...state};
 };
@@ -290,7 +293,7 @@ const getYForFish = (numFish, fishIdx, state, offsetX, predictedClassId) => {
         constants.canvasWidth / 2 - constants.fishCanvasWidth / 2;
       const screenX = getXForFish(numFish, fishIdx, offsetX);
       if (screenX > midScreenX) {
-        y += screenX - midScreenX;
+        y += 1.2 * (screenX - midScreenX);
       }
     }
 

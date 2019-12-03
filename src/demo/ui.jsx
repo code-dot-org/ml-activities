@@ -20,7 +20,8 @@ import aiBotBody from '../../public/images/ai-bot/ai-bot-body.png';
 import aiBotClosed from '../../public/images/ai-bot/ai-bot-closed.png';
 import counterIcon from '../../public/images/polaroid-icon.png';
 import arrowDownImage from '../../public/images/arrow-down.png';
-import snail from '../../public/images/seaCreatures/Snail.png';
+import snail from '../../public/images/snail-large.png';
+import loadingGif from '../../public/images/loading.gif';
 import Typist from 'react-typist';
 import {getCurrentGuide, dismissCurrentGuide} from './models/guide';
 import {playSound} from './models/soundLibrary';
@@ -60,9 +61,8 @@ const styles = {
     minWidth: '15%',
     outline: 'none',
     border: 'none',
-    ':focus': {
-      outline: `${colors.white} auto 5px`
-    }
+    whiteSpace: 'nowrap',
+    lineHeight: 1.3
   },
   continueButton: {
     position: 'absolute',
@@ -120,19 +120,18 @@ const styles = {
     top: '50%',
     bottom: 'initial',
     left: '50%',
-    padding: '2%'
+    padding: '2%',
+    borderRadius: 8
   },
   confirmationDialogContent: {
     display: 'flex',
     justifyContent: 'space-between'
   },
-  confirmationDialogText: {
-    width: '70%'
-  },
   confirmationDialogImg: {
-    maxWidth: '50%',
-    padding: '5%',
-    boxSizing: 'border-box'
+    position: 'absolute',
+    bottom: '-46%',
+    left: '-41%',
+    height: '100%'
   },
   confirmationHeader: {
     fontSize: '220%',
@@ -164,6 +163,13 @@ const styles = {
     right: '5%',
     padding: '3.5% 8%',
     width: '35%'
+  },
+  loading: {
+    position: 'absolute',
+    transform: 'translate(-50%, -50%)',
+    top: '50%',
+    left: '50%',
+    maxWidth: '30%'
   },
   activityIntroText: {
     position: 'absolute',
@@ -208,7 +214,8 @@ const styles = {
     left: '50%',
     transform: 'translateX(-50%)',
     fontSize: '180%',
-    color: colors.white
+    color: colors.white,
+    whiteSpace: 'nowrap'
   },
   trainButtons: {
     position: 'absolute',
@@ -222,24 +229,18 @@ const styles = {
     ':hover': {
       backgroundColor: colors.green,
       color: colors.white
-    },
-    ':focus': {
-      outline: 'none'
     }
   },
   trainButtonNo: {
     ':hover': {
       backgroundColor: colors.red,
       color: colors.white
-    },
-    ':focus': {
-      outline: 'none'
     }
   },
   trainBot: {
     position: 'absolute',
     top: '30%',
-    right: '0%',
+    right: '-2%',
     width: '30%'
   },
   trainBotHead: {
@@ -257,36 +258,37 @@ const styles = {
     width: '49%',
     marginTop: '30%'
   },
-  trainingIcons: {
+  counter: {
+    position: 'absolute',
+    top: '2%',
+    right: '7%',
+    backgroundColor: colors.transparentBlack,
+    color: colors.neonBlue,
+    borderRadius: 33,
+    textAlign: 'right',
+    minWidth: '7%',
+    height: '5%',
+    padding: '1% 2.5%'
+  },
+  counterImg: {
+    float: 'left',
+    height: '100%'
+  },
+  counterNum: {
+    fontSize: '90%'
+  },
+  eraseButtonContainer: {
     position: 'absolute',
     top: '2%',
     right: '1.2%',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  },
-  counter: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: colors.black,
-    opacity: '90%',
-    color: colors.neonBlue,
-    borderRadius: 33,
-    padding: '8px 20px',
-    minWidth: 65
-  },
-  counterNum: {
-    fontSize: '80%',
-    marginLeft: 12
-  },
-  eraseButtonContainer: {
     cursor: 'pointer',
     borderRadius: 50,
-    padding: 8,
-    marginLeft: 10,
+    padding: '0.75% 1.2%',
+    fontSize: '120%',
     backgroundColor: colors.white,
     color: colors.grey,
+    height: '6%',
+    width: '2.4%',
     ':hover': {
       backgroundColor: colors.red,
       color: colors.white
@@ -297,7 +299,9 @@ const styles = {
     }
   },
   eraseButton: {
-    padding: '0 3px'
+    display: 'block',
+    margin: 'auto',
+    height: '100%'
   },
   mediaControls: {
     position: 'absolute',
@@ -371,7 +375,8 @@ const styles = {
     borderRadius: 10,
     left: '3%',
     top: '16%',
-    padding: '2%'
+    padding: '2%',
+    pointerEvents: 'none'
   },
   pondPanelRight: {
     position: 'absolute',
@@ -381,7 +386,8 @@ const styles = {
     borderRadius: 10,
     right: '3%',
     top: '16%',
-    padding: '2%'
+    padding: '2%',
+    pointerEvents: 'none'
   },
   pondPanelPreText: {
     marginBottom: '5%'
@@ -395,7 +401,7 @@ const styles = {
     top: 0,
     left: '0%',
     height: '150%',
-    backgroundColor: colors.green
+    backgroundColor: colors.teal
   },
   pondPanelGeneralBarText: {
     position: 'absolute',
@@ -431,51 +437,51 @@ const styles = {
   pondPanelPostText: {
     marginTop: '3%'
   },
-  recallContainer: {
+  recallIcons: {
     position: 'absolute',
     top: '2%',
-    right: '1.2%',
-    color: colors.white,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between'
-  },
-  recallIcons: {
+    right: '7%',
     backgroundColor: colors.white,
     color: colors.grey,
-    maxHeight: 42,
-    borderRadius: 8
+    height: '8.5%',
+    width: '9.5%',
+    borderRadius: 8,
+    display: 'flex',
+    alignItems: 'center'
   },
   recallIcon: {
     cursor: 'pointer',
-    width: 28,
-    height: 28,
-    padding: 7
+    padding: '0 15%',
+    height: '100%'
   },
   infoIconContainer: {
+    position: 'absolute',
+    top: '2%',
+    right: '1.2%',
     cursor: 'pointer',
     borderRadius: 50,
-    padding: 7,
-    marginLeft: 8,
-    width: 28,
-    height: 28,
+    padding: '0.75% 1.2%',
+    fontSize: '120%',
     backgroundColor: colors.white,
     color: colors.grey,
+    height: '6%',
+    width: '2.5%',
     ':hover': {
-      backgroundColor: colors.neonBlue,
+      backgroundColor: colors.teal,
       color: colors.white
     },
     ':focus': {
-      backgroundColor: colors.neonBlue,
+      backgroundColor: colors.teal,
       color: colors.white
     }
   },
   infoIcon: {
-    width: 28,
-    height: 28
+    display: 'block',
+    margin: 'auto',
+    height: '100%'
   },
-  bgNeonBlue: {
-    backgroundColor: colors.neonBlue,
+  bgTeal: {
+    backgroundColor: colors.teal,
     color: colors.white
   },
   bgRed: {
@@ -485,21 +491,6 @@ const styles = {
   bgGreen: {
     backgroundColor: colors.green,
     color: colors.white
-  },
-  pill: {
-    display: 'flex',
-    alignItems: 'center'
-  },
-  pillIcon: {
-    width: 19,
-    padding: 10,
-    borderRadius: 33
-  },
-  pillText: {
-    color: colors.black,
-    padding: '10px 30px',
-    borderRadius: 33,
-    marginLeft: -18
   },
   count: {
     position: 'absolute',
@@ -521,22 +512,19 @@ const styles = {
     left: '50%',
     transform: 'translateX(-50%)'
   },
-  guideLeft: {
-    float: 'left'
-  },
-  guideRight: {
-    float: 'right',
-    position: 'relative'
-  },
   guideImage: {
-    maxWidth: '90%',
-    padding: '20%',
-    boxSizing: 'border-box'
+    position: 'absolute',
+    bottom: '1%',
+    left: '15%',
+    zIndex: 2,
+    maxHeight: '45%',
+    maxWidth: '35%'
   },
   guideHeading: {
     fontSize: '220%',
     color: colors.darkGrey,
-    paddingBottom: '5%'
+    paddingBottom: '5%',
+    textAlign: 'center'
   },
   guideTypingText: {
     position: 'absolute',
@@ -588,9 +576,17 @@ const styles = {
     maxWidth: '47%',
     transform: 'translate(-50%, -50%)'
   },
+  infoGuideButton: {
+    backgroundColor: colors.orange,
+    color: colors.white,
+    transform: 'translate(-50%)',
+    marginLeft: '50%',
+    marginTop: '2%',
+    padding: '3% 7%'
+  },
   arrowBotRight: {
     top: '15%',
-    right: '14.5%',
+    right: '12.5%',
     transform: 'translateX(-50%)'
   },
   arrowLowerLeft: {
@@ -614,17 +610,14 @@ const styles = {
     transform: 'translateX(-50%)'
   },
   arrowUpperRight: {
-    top: '15%',
-    right: '-2.5%',
+    top: '13%',
+    right: '-2%',
     transform: 'translateX(-50%) rotate(180deg)'
   },
   arrowUpperFarRight: {
     top: '15%',
     right: '-4.6%',
     transform: 'translateX(-50%) rotate(180deg)'
-  },
-  marginRight: {
-    marginRight: 10
   }
 };
 
@@ -718,7 +711,7 @@ let ConfirmationDialog = class ConfirmationDialog extends React.Component {
         <div style={styles.confirmationDialog}>
           <div style={styles.confirmationDialogContent}>
             <img src={snail} style={styles.confirmationDialogImg} />
-            <div style={styles.confirmationDialogText}>
+            <div>
               <div
                 style={styles.confirmationHeader}
                 className="confirmation-text"
@@ -726,8 +719,8 @@ let ConfirmationDialog = class ConfirmationDialog extends React.Component {
                 Are you sure?
               </div>
               <div style={styles.confirmationText}>
-                Erasing AI's data will permanently delete all training. Is that
-                what you want to do?
+                {`Erasing A.I.'s data will permanently delete all training. Is
+                that what you want to do?`}
               </div>
             </div>
           </div>
@@ -754,10 +747,23 @@ let ConfirmationDialog = class ConfirmationDialog extends React.Component {
 };
 ConfirmationDialog = Radium(ConfirmationDialog);
 
+let Loading = class Loading extends React.Component {
+  render() {
+    return (
+      <Body>
+        <img src={loadingGif} style={styles.loading} />
+      </Body>
+    );
+  }
+};
+
 const wordSet = {
   short: {
     text: ['What type of fish do you want to train A.I. to detect?'],
-    choices: [['Blue', 'Green', 'Red'], ['Triangle', 'Round', 'Square']],
+    choices: [
+      ['Blue', 'Green', 'Red'],
+      ['Circular', 'Rectangular', 'Triangular']
+    ],
     style: styles.button2col
   },
   long: {
@@ -821,6 +827,20 @@ let Words = class Words extends React.Component {
       trainingQuestion: `Is this fish “${word.toLowerCase()}”?`
     });
     toMode(Modes.Training);
+
+    // Report an analytics event for the word chosen.
+    if (window.trackEvent) {
+      const appModeToString = {
+        [AppMode.FishShort]: 'words-short',
+        [AppMode.FishLong]: 'words-long'
+      };
+
+      window.trackEvent(
+        'oceans',
+        appModeToString[getState().appMode],
+        word.toLowerCase()
+      );
+    }
   }
 
   render() {
@@ -882,25 +902,23 @@ let Train = class Train extends React.Component {
           />
           <img src={aiBotBody} style={styles.trainBotBody} />
         </div>
-        <div style={styles.trainingIcons}>
-          <div style={styles.counter}>
-            <img src={counterIcon} style={{height: 28}} />
-            <span style={styles.counterNum}>
-              {Math.min(999, state.yesCount + state.noCount)}
-            </span>
-          </div>
-          <span style={styles.eraseButtonContainer}>
-            <FontAwesomeIcon
-              icon={faTrash}
-              style={styles.eraseButton}
-              onClick={() => {
-                setState({
-                  showConfirmationDialog: true,
-                  confirmationDialogOnYes: resetTrainingFunction
-                });
-              }}
-            />
+        <div style={styles.counter}>
+          <img src={counterIcon} style={styles.counterImg} />
+          <span style={styles.counterNum}>
+            {Math.min(999, state.yesCount + state.noCount)}
           </span>
+        </div>
+        <div style={styles.eraseButtonContainer}>
+          <FontAwesomeIcon
+            icon={faTrash}
+            style={styles.eraseButton}
+            onClick={() => {
+              setState({
+                showConfirmationDialog: true,
+                confirmationDialogOnYes: resetTrainingFunction
+              });
+            }}
+          />
         </div>
         <div style={styles.trainButtons}>
           <Button
@@ -911,7 +929,8 @@ let Train = class Train extends React.Component {
             }}
             sound={'no'}
           >
-            <FontAwesomeIcon icon={faBan} style={styles.marginRight} />
+            <FontAwesomeIcon icon={faBan} />
+            &nbsp; &nbsp;
             {noButtonText}
           </Button>
           <Button
@@ -922,7 +941,8 @@ let Train = class Train extends React.Component {
             }}
             sound={'yes'}
           >
-            <FontAwesomeIcon icon={faCheck} style={styles.marginRight} />
+            <FontAwesomeIcon icon={faCheck} />
+            &nbsp; &nbsp;
             {yesButtonText}
           </Button>
         </div>
@@ -1069,8 +1089,8 @@ let Predict = class Predict extends React.Component {
         )}
         {!state.isRunning && !state.isPaused && (
           <Button style={styles.continueButton} onClick={this.onRun}>
-            <FontAwesomeIcon icon={faPlay} style={styles.marginRight} />
-            Run
+            <FontAwesomeIcon icon={faPlay} />
+            &nbsp; &nbsp; Run
           </Button>
         )}
         {(state.isRunning || state.isPaused) && state.canSkipPredict && (
@@ -1227,15 +1247,29 @@ let Pond = class Pond extends React.Component {
       return;
     }
 
-    const showRecallFish = !state.showRecallFish;
-    const fish = showRecallFish ? state.recallFish : state.pondFish;
-
-    // Don't call arrangeFish if fish have already been arranged.
-    if (fish.length > 0 && !fish[0].getXY()) {
-      arrangeFish(fish);
+    let currentFishSet, nextFishSet;
+    if (state.showRecallFish) {
+      currentFishSet = state.recallFish;
+      nextFishSet = state.pondFish;
+      playSound('yes');
+    } else {
+      currentFishSet = state.pondFish;
+      nextFishSet = state.recallFish;
+      playSound('no');
     }
 
-    setState({pondFishTransitionStartTime: $time(), pondClickedFish: null});
+    // Don't call arrangeFish if fish have already been arranged.
+    if (nextFishSet.length > 0 && !nextFishSet[0].getXY()) {
+      arrangeFish(nextFishSet);
+    }
+
+    if (currentFishSet.length === 0) {
+      // Immediately transition to nextFishSet rather than waiting for empty animation.
+      setState({showRecallFish: !state.showRecallFish, pondClickedFish: null});
+    } else {
+      setState({pondFishTransitionStartTime: $time(), pondClickedFish: null});
+    }
+
     e.stopPropagation();
   };
 
@@ -1316,7 +1350,7 @@ let Pond = class Pond extends React.Component {
       });
 
       if (!fishClicked) {
-        setState({pondClickedFish: null, pondPanelShowing: false});
+        setState({pondClickedFish: null});
         playSound('no');
       }
     }
@@ -1330,9 +1364,14 @@ let Pond = class Pond extends React.Component {
       state.appMode === AppMode.FishLong
     ) {
       setState({
-        pondPanelShowing: !state.pondPanelShowing,
-        pondClickedFish: null
+        pondPanelShowing: !state.pondPanelShowing
       });
+
+      if (state.pondPanelShowing) {
+        playSound('sortno');
+      } else {
+        playSound('sortyes');
+      }
     }
 
     e.stopPropagation();
@@ -1346,46 +1385,44 @@ let Pond = class Pond extends React.Component {
         state.appMode === AppMode.FishLong) &&
       state.pondFish.length > 0 &&
       state.recallFish.length > 0;
+    const recallIconsStyle = showInfoButton
+      ? styles.recallIcons
+      : {...styles.recallIcons, right: '1.2%'};
 
     return (
       <Body>
         <div onClick={e => this.onPondClick(e)} style={styles.pondSurface} />
-        <div style={styles.recallContainer}>
-          <div style={styles.recallIcons}>
-            <FontAwesomeIcon
-              icon={faCheck}
-              style={{
-                ...styles.recallIcon,
-                ...{borderTopLeftRadius: 8, borderBottomLeftRadius: 8},
-                ...(!state.showRecallFish ? styles.bgGreen : {})
-              }}
-              onClick={this.toggleRecall}
-            />
-            <FontAwesomeIcon
-              icon={faBan}
-              style={{
-                ...styles.recallIcon,
-                ...{borderTopRightRadius: 8, borderBottomRightRadius: 8},
-                ...(state.showRecallFish ? styles.bgRed : {})
-              }}
-              onClick={this.toggleRecall}
-            />
-          </div>
-          {showInfoButton && (
-            <span
-              style={{
-                ...styles.infoIconContainer,
-                ...(!state.pondPanelShowing ? {} : styles.bgNeonBlue)
-              }}
-            >
-              <FontAwesomeIcon
-                icon={faInfo}
-                style={styles.infoIcon}
-                onClick={this.onPondPanelButtonClick}
-              />
-            </span>
-          )}
+        <div style={recallIconsStyle}>
+          <FontAwesomeIcon
+            icon={faCheck}
+            style={{
+              ...styles.recallIcon,
+              ...{borderTopLeftRadius: 8, borderBottomLeftRadius: 8},
+              ...(!state.showRecallFish ? styles.bgGreen : {})
+            }}
+            onClick={this.toggleRecall}
+          />
+          <FontAwesomeIcon
+            icon={faBan}
+            style={{
+              ...styles.recallIcon,
+              ...{borderTopRightRadius: 8, borderBottomRightRadius: 8},
+              ...(state.showRecallFish ? styles.bgRed : {})
+            }}
+            onClick={this.toggleRecall}
+          />
         </div>
+        {showInfoButton && (
+          <div
+            style={{
+              ...styles.infoIconContainer,
+              ...(!state.pondPanelShowing ? {} : styles.bgTeal)
+            }}
+            onClick={this.onPondPanelButtonClick}
+          >
+            <FontAwesomeIcon icon={faInfo} style={styles.infoIcon} />
+          </div>
+        )}
         <img style={styles.pondBot} src={aiBotClosed} />
         {state.canSkipPond && (
           <div>
@@ -1435,9 +1472,10 @@ let Pond = class Pond extends React.Component {
 };
 Pond = Radium(Pond);
 
-class Guide extends React.Component {
+let Guide = class Guide extends React.Component {
   onShowing() {
-    setState({guideShowing: true});
+    clearInterval(getState().guideTypingTimer);
+    setState({guideShowing: true, guideTypingTimer: null});
   }
 
   dismissGuideClick() {
@@ -1448,29 +1486,42 @@ class Guide extends React.Component {
   }
 
   render() {
+    const state = getState();
     const currentGuide = getCurrentGuide();
 
-    // We migth show an image on the left and text on the right.  If there's
-    // no image, it's all right.
-    let leftWidth, rightWidth;
-    if (currentGuide && currentGuide.image) {
-      leftWidth = '30%';
-      rightWidth = '70%';
-    } else {
-      rightWidth = '100%';
+    let guideBgStyle = [styles.guideBackground];
+    if (currentGuide) {
+      if (currentGuide.noDimBackground) {
+        guideBgStyle = [styles.guideBackgroundHidden];
+      }
+
+      // Info guides should have a darker background color.
+      if (currentGuide.style === 'Info') {
+        guideBgStyle.push({backgroundColor: colors.transparentBlack});
+      }
+    }
+
+    // Start playing the typing sounds.
+    if (!state.guideShowing && !state.guideTypingTimer && currentGuide) {
+      const guideTypingTimer = setInterval(() => {
+        playSound('no', 0.5);
+      }, 1000 / 10);
+      setState({guideTypingTimer});
     }
 
     return (
       <div>
+        {currentGuide && currentGuide.image && (
+          <img
+            src={currentGuide.image}
+            style={[styles.guideImage, currentGuide.imageStyle || {}]}
+          />
+        )}
         {!!currentGuide && (
           <div>
             <div
               key={currentGuide.id}
-              style={
-                currentGuide.noDimBackground
-                  ? styles.guideBackgroundHidden
-                  : styles.guideBackground
-              }
+              style={guideBgStyle}
               onClick={this.dismissGuideClick}
             >
               <div
@@ -1479,13 +1530,7 @@ class Guide extends React.Component {
                   ...styles[`guide${currentGuide.style}`]
                 }}
               >
-                {currentGuide.image && (
-                  <div style={{...styles.guideLeft, width: leftWidth}}>
-                    <img src={currentGuide.image} style={styles.guideImage} />
-                  </div>
-                )}
-
-                <div style={{...styles.guideRight, width: rightWidth}}>
+                <div>
                   {currentGuide.heading && (
                     <div style={styles.guideHeading}>
                       {currentGuide.heading}
@@ -1516,6 +1561,11 @@ class Guide extends React.Component {
                         : currentGuide.text}
                     </div>
                   </div>
+                  {currentGuide.style === 'Info' && (
+                    <Button style={styles.infoGuideButton} onClick={() => {}}>
+                      Continue
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
@@ -1533,7 +1583,8 @@ class Guide extends React.Component {
       </div>
     );
   }
-}
+};
+Guide = Radium(Guide);
 
 export default class UI extends React.Component {
   constructor(props) {
@@ -1543,9 +1594,13 @@ export default class UI extends React.Component {
   render() {
     const state = getState();
     const currentMode = getState().currentMode;
+    const isLoading = [Modes.Loading, Modes.IntermediateLoading].includes(
+      currentMode
+    );
 
     return (
       <div>
+        {isLoading && <Loading />}
         {currentMode === Modes.Words && <Words />}
         {currentMode === Modes.Training && <Train />}
         {currentMode === Modes.Predicting && <Predict />}
