@@ -1,5 +1,3 @@
-import _ from 'lodash';
-
 export const downloadFish = (ocean, filename) => {
   const canvas = document.createElement('canvas');
   canvas.width = 310 * 10;
