@@ -135,27 +135,39 @@ export const render = () => {
 
       if (state.appMode === AppMode.CreaturesVTrashDemo) {
         if (state.biasTextTime) {
-          setState({
-            canSkipPredict:
-              $time() >= state.biasTextTime + timeBeforeCanSkipBiasText
-          });
+          if (
+            !state.canSkipPredict &&
+            $time() >= state.biasTextTime + timeBeforeCanSkipBiasText
+          ) {
+            setState({
+              canSkipPredict: true
+            });
+          }
         }
       } else if (state.isRunning) {
-        setState({
-          canSkipPredict:
-            $time() >= state.runStartTime + timeBeforeCanSkipPredict
-        });
+        if (
+          !state.canSkipPredict &&
+          $time() >= state.runStartTime + timeBeforeCanSkipPredict
+        ) {
+          setState({
+            canSkipPredict: true
+          });
+        }
       }
 
       break;
     case Modes.Pond:
       drawPondFishImages();
 
-      setState({
-        canSkipPond: $time() >= currentModeStartTime + timeBeforeCanSkipPond,
-        canSeePondText:
-          $time() >= currentModeStartTime + timeBeforeCanSeePondText
-      });
+      if (
+        !state.canSkipPond &&
+        $time() >= currentModeStartTime + timeBeforeCanSkipPond
+      ) {
+        setState({canSkipPond: true});
+      }
+      if (!state.canSeePondText) {
+        setState({canSeePondText: true});
+      }
       break;
   }
 
@@ -577,7 +589,7 @@ const drawWordFishImages = () => {
     }
   });
 
-  setState({fishCount});
+  setState({fishCount}, {skipCallback: true});
 };
 
 const pondFishTransitionTime = 1500;
