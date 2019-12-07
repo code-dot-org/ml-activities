@@ -165,7 +165,10 @@ export const render = () => {
       ) {
         setState({canSkipPond: true});
       }
-      if (!state.canSeePondText) {
+      if (
+        !state.canSeePondText &&
+        $time() >= currentModeStartTime + timeBeforeCanSeePondText
+      ) {
         setState({canSeePondText: true});
       }
       break;
