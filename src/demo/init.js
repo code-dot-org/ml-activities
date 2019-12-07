@@ -7,6 +7,7 @@ import {setInitialState, setSetStateCallback} from './state';
 import {render as renderCanvas} from './renderer';
 import {toMode} from './toMode';
 import {loadSounds, injectSoundAPIs} from './models/soundLibrary';
+import {oceans_locale} from '../../i18n/oceans';
 
 //
 // Required in options:
@@ -16,7 +17,7 @@ import {loadSounds, injectSoundAPIs} from './models/soundLibrary';
 //  onContinue
 //
 export const initAll = function(options) {
-  const { canvas, backgroundCanvas } = options;
+  const {canvas, backgroundCanvas} = options;
 
   canvas.width = backgroundCanvas.width = constants.canvasWidth;
   canvas.height = backgroundCanvas.height = constants.canvasHeight;
@@ -26,10 +27,16 @@ export const initAll = function(options) {
 
   loadSounds();
 
+  let i18n = oceans_locale;
+  if (options.i18n) {
+    i18n = {...i18n, ...options.i18n};
+  }
+  console.log(oceans_locale);
   // Set initial state for UI elements.
   setInitialState({
     currentMode: Modes.Loading,
-    ...options
+    ...options,
+    i18n
   });
 
   // Initialize our first model.

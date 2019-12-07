@@ -487,6 +487,9 @@ export function getCurrentGuide() {
       if (
         !(state.guideDismissals && state.guideDismissals.includes(guide.id))
       ) {
+        if (state.i18n[guide.id]) {
+          guide.text = state.i18n[guide.id]();
+        }
         return guide;
       }
     }
