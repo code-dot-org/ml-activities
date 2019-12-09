@@ -31,7 +31,6 @@ export const initAll = function(options) {
   if (options.i18n) {
     i18n = {...i18n, ...options.i18n};
   }
-  console.log(oceans_locale);
   // Set initial state for UI elements.
   setInitialState({
     currentMode: Modes.Loading,
