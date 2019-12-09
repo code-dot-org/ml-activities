@@ -11,7 +11,7 @@
     }
   },
   "scripts": {
-    "build": "webpack -p",
+    "build": "node bin/compileI18n.js && webpack -p",
     "build:i18n": "node bin/compileI18n.js",
     "start": "yarn run dev",
     "dev": "webpack-dev-server --mode development --content-base public --host 0.0.0.0 --disable-host-check",

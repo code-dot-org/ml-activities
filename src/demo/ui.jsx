@@ -950,7 +950,7 @@ let Train = class Train extends React.Component {
           style={styles.continueButton}
           onClick={() => toMode(Modes.Predicting)}
         >
-          Continue
+          {state.i18n.continue()}
         </Button>
       </Body>
     );
@@ -1095,7 +1095,7 @@ let Predict = class Predict extends React.Component {
         )}
         {(state.isRunning || state.isPaused) && state.canSkipPredict && (
           <Button style={styles.continueButton} onClick={this.onContinue}>
-            Continue
+            {state.i18n.continue()}
           </Button>
         )}
       </Body>
@@ -1450,7 +1450,7 @@ let Pond = class Pond extends React.Component {
                 style={styles.continueButton}
                 onClick={() => state.onContinue()}
               >
-                Continue
+                {state.i18n.continue()}
               </Button>
             )}
             <div>
@@ -1564,7 +1564,7 @@ let Guide = class Guide extends React.Component {
                   </div>
                   {currentGuide.style === 'Info' && (
                     <Button style={styles.infoGuideButton} onClick={() => {}}>
-                      Continue
+                      {state.i18n.continue()}
                     </Button>
                   )}
                 </div>
