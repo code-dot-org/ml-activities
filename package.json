@@ -17,7 +17,7 @@
     "outfile": "i18n/oceans.js"
   },
   "scripts": {
-    "build": "node bin/compileI18n.js && webpack -p",
+    "build": "yarn build:i18n && webpack -p",
     "build:i18n": "messageformat",
     "start": "yarn run dev",
     "dev": "webpack-dev-server --mode development --content-base public --host 0.0.0.0 --disable-host-check",

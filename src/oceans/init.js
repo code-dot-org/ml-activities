@@ -7,7 +7,6 @@ import {setInitialState, setSetStateCallback} from './state';
 import {render as renderCanvas} from './renderer';
 import {toMode} from './toMode';
 import {loadSounds, injectSoundAPIs} from './models/soundLibrary';
-//import MessageFormat from 'messageformat';
 import {init as initI18n} from '../utils/i18n';
 
 //

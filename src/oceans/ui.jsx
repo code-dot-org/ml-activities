@@ -883,7 +883,7 @@ let Train = class Train extends React.Component {
     const yesButtonText =
       state.appMode === AppMode.CreaturesVTrash ? I18n.t('yes') : state.word;
     const noButtonText =
-      state.appMode === AppMode.CreaturesVTrash ? I18n.t('no') : `Not ${state.word}`;
+      state.appMode === AppMode.CreaturesVTrash ? I18n.t('no') : I18n.t('notWord', {WORD: state.word});
     const resetTrainingFunction = () => {
       resetTraining(state);
       setState({showConfirmationDialog: false});
