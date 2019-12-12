@@ -1,0 +1,11 @@
+{
+    "areYouSure": "Êtes-vous sûr?",
+    "eraseWarning": "L'effacement des données de A.I.effacera définitivement toutes les formations. C'est ça que tu veux faire?",
+    "yes": "Oui",
+    "no": "Non",
+    "notWord": "Pas {WORD}",
+    "run": "Courir",
+    "newWord": "Nouveau mot",
+    "green": "Verte",
+    "red": "Red"
+}

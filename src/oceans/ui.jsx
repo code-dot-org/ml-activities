@@ -37,6 +37,7 @@ import {
   faInfo,
   faTrash
 } from '@fortawesome/free-solid-svg-icons';
+import * as I18n from '../utils/i18n';
 
 const styles = {
   body: {
@@ -719,8 +720,7 @@ let ConfirmationDialog = class ConfirmationDialog extends React.Component {
                 Are you sure?
               </div>
               <div style={styles.confirmationText}>
-                {`Erasing A.I.'s data will permanently delete all training. Is
-                that what you want to do?`}
+                {I18n.t('eraseWarning')}
               </div>
             </div>
           </div>
@@ -881,9 +881,9 @@ let Train = class Train extends React.Component {
   render() {
     const state = getState();
     const yesButtonText =
-      state.appMode === AppMode.CreaturesVTrash ? 'Yes' : state.word;
+      state.appMode === AppMode.CreaturesVTrash ? I18n.t('yes') : state.word;
     const noButtonText =
-      state.appMode === AppMode.CreaturesVTrash ? 'No' : `Not ${state.word}`;
+      state.appMode === AppMode.CreaturesVTrash ? I18n.t('no') : `Not ${state.word}`;
     const resetTrainingFunction = () => {
       resetTraining(state);
       setState({showConfirmationDialog: false});
@@ -950,7 +950,7 @@ let Train = class Train extends React.Component {
           style={styles.continueButton}
           onClick={() => toMode(Modes.Predicting)}
         >
-          Continue
+        {I18n.t('continue')}
         </Button>
       </Body>
     );
@@ -1095,7 +1095,7 @@ let Predict = class Predict extends React.Component {
         )}
         {(state.isRunning || state.isPaused) && state.canSkipPredict && (
           <Button style={styles.continueButton} onClick={this.onContinue}>
-            Continue
+          {I18n.t('continue')}
           </Button>
         )}
       </Body>

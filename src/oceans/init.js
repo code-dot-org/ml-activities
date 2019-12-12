@@ -7,6 +7,8 @@ import {setInitialState, setSetStateCallback} from './state';
 import {render as renderCanvas} from './renderer';
 import {toMode} from './toMode';
 import {loadSounds, injectSoundAPIs} from './models/soundLibrary';
+//import MessageFormat from 'messageformat';
+import {init as initI18n} from '../utils/i18n';
 
 //
 // Required in options:
@@ -16,7 +18,7 @@ import {loadSounds, injectSoundAPIs} from './models/soundLibrary';
 //  onContinue
 //
 export const initAll = function(options) {
-  const { canvas, backgroundCanvas } = options;
+  const {canvas, backgroundCanvas} = options;
 
   canvas.width = backgroundCanvas.width = constants.canvasWidth;
   canvas.height = backgroundCanvas.height = constants.canvasHeight;
@@ -25,6 +27,16 @@ export const initAll = function(options) {
   injectSoundAPIs(options);
 
   loadSounds();
+
+  // const data = require('../../i18n/oceans.json');
+  //const mf = new MessageFormat();
+  //const i18n = mf.precompileObject(JSON.parse(data));
+
+  if (options.locale) {
+    initI18n(options.locale);
+  } else {
+    initI18n('en');
+  }
 
   // Set initial state for UI elements.
   setInitialState({
