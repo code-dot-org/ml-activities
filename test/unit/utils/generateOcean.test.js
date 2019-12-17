@@ -1,3 +1,4 @@
+import '@babel/polyfill';
 import {initFishData} from '@ml/utils/fishData';
 import {generateOcean, filterOcean} from '@ml/utils/generateOcean';
 import SimpleTrainer from '@ml/utils/SimpleTrainer';

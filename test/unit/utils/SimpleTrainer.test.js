@@ -1,3 +1,4 @@
+import '@babel/polyfill';
 import SimpleTrainer from '@ml/utils/SimpleTrainer';
 import * as tf from '@tensorflow/tfjs';
 

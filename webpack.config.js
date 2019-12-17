@@ -32,8 +32,7 @@ const commonConfig = {
           {
             loader: 'babel-loader',
             options: {
-              presets: ['react', 'env'],
-              plugins: ['transform-class-properties']
+              plugins: ['@babel/plugin-proposal-class-properties']
             }
           }
         ]

@@ -1,4 +1,4 @@
-import 'babel-polyfill';
+import '@babel/polyfill';
 import $ from 'jquery';
 import './assetPath';
 import {queryStrFor} from './helpers';

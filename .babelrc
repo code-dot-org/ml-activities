@@ -1,11 +1,11 @@
 {
-  "presets": ["env", "react" ],
+  "presets": ["@babel/env", "@babel/react" ],
     "plugins": [
       "add-module-exports",
-      "syntax-async-functions",
-      "transform-object-rest-spread",
-      "transform-class-properties",
-      ["transform-regenerator", {"async": true, "asyncGenerators": true}],
-      ["transform-es2015-classes", {"loose": true}]
+      "@babel/plugin-syntax-async-generators",
+      "@babel/plugin-proposal-object-rest-spread",
+      "@babel/plugin-proposal-class-properties",
+      ["@babel/transform-regenerator", {"async": true, "asyncGenerators": true}],
+      ["@babel/transform-classes", {"loose": true}]
   ]
 }
