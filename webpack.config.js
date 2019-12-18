@@ -67,8 +67,9 @@ const commonConfig = {
       },
       {
         test: /\.(mp3|ogg|wav)$/,
-        loader: 'file-loader',
+        loader: 'url-loader',
         options: {
+          limit: 8192,
           outputPath: 'assets/sounds',
           publicPath: 'sounds',
           postTransformPublicPath: p =>
