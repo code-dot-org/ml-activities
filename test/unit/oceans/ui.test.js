@@ -196,6 +196,18 @@ describe('Words', () => {
       expect(getState().word).toEqual(expectedWord);
     });
 
+    it('sets the translated word in state', () => {
+      const wrapper = shallow(<Words {...DEFAULT_PROPS} />);
+
+      const i = 1;
+      I18n.initI18n({[wrapper.state().choices[i]]: () => 'un mot'});
+      wrapper
+        .find('Button')
+        .at(i)
+        .simulate('click');
+      expect(getState().word).toEqual('un mot');
+    });
+
     it('transitions to Modes.Training', () => {
       const wrapper = shallow(<Words {...DEFAULT_PROPS} />);
 
@@ -566,6 +578,38 @@ describe('Pond', () => {
       expect(buttons.length).toEqual(2);
       expect(getBtnText(buttons, 0)).toEqual('Continue');
       expect(getBtnText(buttons, 1)).toEqual('Train More');
+    });
+
+    it('displays translated buttons based on appMode state', () => {
+      const getBtnText = (btns, i) =>
+        btns
+          .at(i)
+          .render()
+          .text();
+
+      I18n.initI18n({
+        continue: () => 'Continuer',
+        newWord: () => 'Nouveau Travail',
+        finish: () => 'Terminer',
+        trainMore: () => 'Former Plus'
+      });
+
+      setState({canSkipPond: true, appMode: AppMode.FishLong});
+      let wrapper = shallow(<Pond {...DEFAULT_PROPS} />);
+
+      let buttons = wrapper.find('#uitest-nav-btns').find('Button');
+      expect(buttons.length).toEqual(3);
+      expect(getBtnText(buttons, 0)).toEqual('Nouveau Travail');
+      expect(getBtnText(buttons, 1)).toEqual('Terminer');
+      expect(getBtnText(buttons, 2)).toEqual('Former Plus');
+
+      setState({appMode: 'not-fish-long'});
+      wrapper = shallow(<Pond {...DEFAULT_PROPS} />);
+
+      buttons = wrapper.find('#uitest-nav-btns').find('Button');
+      expect(buttons.length).toEqual(2);
+      expect(getBtnText(buttons, 0)).toEqual('Continuer');
+      expect(getBtnText(buttons, 1)).toEqual('Former Plus');
     });
 
     it('"new word" button resets training and transitions to Modes.Words', () => {
