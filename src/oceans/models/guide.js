@@ -105,6 +105,19 @@ const guides = [
       }
     }
   },
+  ...[50, 100, 150, 200, 250, 300].map(count => {
+    return {
+      id: `fishvtrash-training-pause6-count-${count}`,
+      textFn: () => I18n.t('fishvtrash-training-pause6'),
+      when: {
+        appMode: AppMode.FishVTrash,
+        currentMode: Modes.Training,
+        fn: state => {
+          return state.yesCount + state.noCount >= count;
+        }
+      }
+    }
+  }),
   {
     id: 'fishvtrash-predicting-init1',
     textFn: () => I18n.t('fishvtrash-predicting-init1'),
