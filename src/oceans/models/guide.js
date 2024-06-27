@@ -14,6 +14,8 @@ const imageStyleOverrides = {
   can: {bottom: '2%', left: '16%'}
 };
 
+const encourageContinueTrainingCounts = [50, 100, 150, 200, 250, 300];
+
 const guides = [
   {
     id: 'fishvtrash-training-init1',
@@ -105,10 +107,10 @@ const guides = [
       }
     }
   },
-  ...[50, 100, 150, 200, 250, 300].map(count => {
+  ...encourageContinueTrainingCounts.map(count => {
     return {
-      id: `fishvtrash-training-pause6-count-${count}`,
-      textFn: () => I18n.t('fishvtrash-training-pause6'),
+      id: `fishvtrash-training-generic-please-continue-count-${count}`,
+      textFn: () => I18n.t('training-generic-please-continue'),
       when: {
         appMode: AppMode.FishVTrash,
         currentMode: Modes.Training,
@@ -290,6 +292,19 @@ const guides = [
       }
     }
   },
+  ...encourageContinueTrainingCounts.map(count => {
+    return {
+      id: `creaturesvtrash-training-generic-please-continue-count-${count}`,
+      textFn: () => I18n.t('training-generic-please-continue'),
+      when: {
+        appMode: AppMode.CreaturesVTrash,
+        currentMode: Modes.Training,
+        fn: state => {
+          return state.yesCount + state.noCount >= count;
+        }
+      }
+    }
+  }),
   {
     id: 'creaturesvtrash-predicting-init1',
     textFn: () => I18n.t('creaturesvtrash-predicting-init1'),
@@ -407,39 +422,19 @@ const guides = [
       }
     }
   },
-  {
-    id: 'fishlong-training-pause3',
-    textFn: () => I18n.t('fishlong-training-pause3'),
-    when: {
-      appMode: AppMode.FishLong,
-      currentMode: Modes.Training,
-      fn: state => {
-        return state.yesCount + state.noCount >= 50;
+  ...encourageContinueTrainingCounts.map(count => {
+    return {
+      id: `fishlong-training-generic-please-continue-count-${count}`,
+      textFn: () => I18n.t('training-generic-please-continue'),
+      when: {
+        appMode: AppMode.FishLong,
+        currentMode: Modes.Training,
+        fn: state => {
+          return state.yesCount + state.noCount >= count;
+        }
       }
     }
-  },
-  {
-    id: 'fishlong-training-pause4',
-    textFn: () => I18n.t('fishlong-training-pause4'),
-    when: {
-      appMode: AppMode.FishLong,
-      currentMode: Modes.Training,
-      fn: state => {
-        return state.yesCount + state.noCount >= 100;
-      }
-    }
-  },
-  {
-    id: 'fishlong-training-many',
-    textFn: () => I18n.t('fishlong-training-many'),
-    when: {
-      appMode: AppMode.FishLong,
-      currentMode: Modes.Training,
-      fn: state => {
-        return state.yesCount + state.noCount >= 300;
-      }
-    }
-  },
+  }),
   {
     id: 'fishlong-predicting-init1',
     textFn: state =>
