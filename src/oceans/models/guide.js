@@ -47,20 +47,6 @@ const guides = [
     arrow: 'LowerCenter'
   },
   {
-    id: 'fishvtrash-training-pause1',
-    textFn: () => I18n.t('fishvtrash-training-pause1'),
-    when: {
-      appMode: AppMode.FishVTrash,
-      currentMode: Modes.Training,
-      fn: state => {
-        return state.yesCount + state.noCount >= 5;
-      }
-    },
-    style: 'Info',
-    image: trashBottleImage,
-    imageStyle: imageStyleOverrides.bottle
-  },
-  {
     id: 'fishvtrash-training-pause2',
     textFn: () => I18n.t('fishvtrash-training-pause2'),
     when: {
