@@ -2,7 +2,7 @@ import React from 'react'
 import Radium from "radium";
 import Typist from "react-typist";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faArrowCircleRight} from "@fortawesome/free-solid-svg-icons";
+import {faArrowCircleDown} from "@fortawesome/free-solid-svg-icons";
 
 import "@ml/oceans/styles/bounce.css";
 
@@ -91,8 +91,8 @@ let UnwrappedGuide = class Guide extends React.Component {
                       {currentGuide.textFn(getState())}
                     </Typist>
                     {currentGuide.style !== 'Info' && (
-                      <div style={{marginLeft: 10, opacity: getState().guideTypingTimer ? 0 : 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', width: 30, alignItems: 'end'}}>
-                        <FontAwesomeIcon icon={faArrowCircleRight} className="bounce" />
+                      <div style={{marginLeft: 10, opacity: getState().guideTypingTimer ? 0 : 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', width: 30, alignItems: 'end'}}>
+                        <FontAwesomeIcon icon={faArrowCircleDown} className="bounce" />
                       </div>
                     )}
                   </div>
@@ -106,8 +106,8 @@ let UnwrappedGuide = class Guide extends React.Component {
                     <div style={styles.guideFinalText}>
                       {currentGuide.textFn(getState())}
                       {currentGuide.style !== 'Info' && (
-                        <div style={{marginLeft: 10, display: 'flex', flexDirection: 'column', justifyContent: 'center', width: 30, alignItems: 'end'}}>
-                          <FontAwesomeIcon icon={faArrowCircleRight} className="bounce" />
+                        <div style={{marginLeft: 10, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', width: 30, alignItems: 'end'}}>
+                          <FontAwesomeIcon icon={faArrowCircleDown} className="bounce" />
                         </div>
                       )}
                     </div>
