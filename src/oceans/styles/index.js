@@ -496,7 +496,8 @@ const styles = {
   },
   guideTypingText: {
     position: 'absolute',
-    padding: 20
+    padding: 20,
+    display: 'flex'
   },
   guideFinalTextContainer: {},
   guideFinalTextInfoContainer: {
@@ -505,7 +506,8 @@ const styles = {
   },
   guideFinalText: {
     padding: 20,
-    opacity: 0
+    opacity: 0,
+    display: 'flex'
   },
   guideBackground: {
     backgroundColor: 'rgba(0,0,0,0.3)',
