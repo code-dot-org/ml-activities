@@ -14,7 +14,7 @@ const imageStyleOverrides = {
   can: {bottom: '2%', left: '16%'}
 };
 
-const encourageContinueTrainingCounts = [50, 100, 150, 200, 250, 300];
+const encourageStopTrainingCounts = [50, 100, 150, 200, 250, 300];
 
 const guides = [
   {
@@ -107,7 +107,7 @@ const guides = [
       }
     }
   },
-  ...encourageContinueTrainingCounts.map(count => {
+  ...encourageStopTrainingCounts.map(count => {
     return {
       id: `fishvtrash-training-generic-please-continue-count-${count}`,
       textFn: () => I18n.t('training-generic-please-continue'),
@@ -292,7 +292,7 @@ const guides = [
       }
     }
   },
-  ...encourageContinueTrainingCounts.map(count => {
+  ...encourageStopTrainingCounts.map(count => {
     return {
       id: `creaturesvtrash-training-generic-please-continue-count-${count}`,
       textFn: () => I18n.t('training-generic-please-continue'),
@@ -422,7 +422,7 @@ const guides = [
       }
     }
   },
-  ...encourageContinueTrainingCounts.map(count => {
+  ...encourageStopTrainingCounts.map(count => {
     return {
       id: `fishlong-training-generic-please-continue-count-${count}`,
       textFn: () => I18n.t('training-generic-please-continue'),
