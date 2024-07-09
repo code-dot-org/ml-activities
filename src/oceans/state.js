@@ -39,7 +39,13 @@ const initialState = {
   guideShowing: false,
   showConfirmationDialog: false,
   confirmationDialogOnYes: null,
-  textToSpeechLocale: undefined
+  textToSpeechLocale: undefined,
+  // Whether text to speech has ever been successfully
+  // started via a user click.
+  textToSpeechStartedViaClick: false,
+  // The current guide, if any, being played as text
+  // to speech.
+  textToSpeechCurrentGuide: undefined
 };
 let state = {...initialState};
 

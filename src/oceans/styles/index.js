@@ -544,6 +544,16 @@ const styles = {
     maxWidth: '47%',
     transform: 'translate(-50%, -50%)'
   },
+  guideTextToSpeechIcon: {
+    paddingLeft: 20,
+    paddingBottom: 20
+  },
+  guideTextToSpeechIconDim: {
+    opacity: 0.3
+  },
+  guideTextToSpeechIconRegular: {
+    opacity: 1
+  },
   infoGuideButton: {
     backgroundColor: colors.orange,
     color: colors.white,
