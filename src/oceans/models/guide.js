@@ -33,6 +33,11 @@ const getCurrentGuide = () => {
   return null;
 };
 
+const guideShowingNotTyping = () => {
+  const currentGuide = getCurrentGuide();
+  return currentGuide && getState().guideShowing;
+}
+
 const dismissCurrentGuide = () => {
   const currentGuide = getCurrentGuide();
 
@@ -53,5 +58,6 @@ const dismissCurrentGuide = () => {
 
 export default {
   getCurrentGuide,
-  dismissCurrentGuide
+  dismissCurrentGuide,
+  guideShowingNotTyping
 };

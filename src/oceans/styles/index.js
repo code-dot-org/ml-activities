@@ -21,7 +21,6 @@ const styles = {
     fontSize: '100%',
     borderRadius: 8,
     minWidth: '15%',
-    outline: 'none',
     border: 'none',
     whiteSpace: 'nowrap',
     lineHeight: 1.3

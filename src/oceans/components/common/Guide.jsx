@@ -15,6 +15,7 @@ let UnwrappedGuide = class Guide extends React.Component {
   onShowing() {
     clearInterval(getState().guideTypingTimer);
     setState({guideShowing: true, guideTypingTimer: null});
+    document.getElementById("uitest-dismiss-guide").focus();
   }
 
   dismissGuideClick() {
@@ -59,10 +60,11 @@ let UnwrappedGuide = class Guide extends React.Component {
         )}
         {!!currentGuide && (
           <div>
-            <div
+            <button
               key={currentGuide.id}
               style={guideBgStyle}
               onClick={this.dismissGuideClick}
+              disabled={!guide.guideShowingNotTyping()}
               id="uitest-dismiss-guide"
             >
               <div
@@ -105,7 +107,7 @@ let UnwrappedGuide = class Guide extends React.Component {
                   )}
                 </div>
               </div>
-            </div>
+            </button>
             {currentGuide.arrow && (
               <img
                 src={arrowDownImage}
