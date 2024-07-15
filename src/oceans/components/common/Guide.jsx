@@ -12,10 +12,17 @@ import {Button} from "@ml/oceans/components/common";
 import arrowDownImage from "@public/images/arrow-down.png";
 
 let UnwrappedGuide = class Guide extends React.Component {
+  componentDidMount() {
+    document.addEventListener("keydown", this.dismissGuideClick);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener("keydown", this.dismissGuideClick);
+  }
+
   onShowing() {
     clearInterval(getState().guideTypingTimer);
     setState({guideShowing: true, guideTypingTimer: null});
-    document.getElementById("uitest-dismiss-guide").focus();
   }
 
   dismissGuideClick() {
@@ -60,11 +67,10 @@ let UnwrappedGuide = class Guide extends React.Component {
         )}
         {!!currentGuide && (
           <div>
-            <button
+            <div
               key={currentGuide.id}
               style={guideBgStyle}
               onClick={this.dismissGuideClick}
-              disabled={!guide.guideShowingNotTyping()}
               id="uitest-dismiss-guide"
             >
               <div
@@ -107,7 +113,7 @@ let UnwrappedGuide = class Guide extends React.Component {
                   )}
                 </div>
               </div>
-            </button>
+            </div>
             {currentGuide.arrow && (
               <img
                 src={arrowDownImage}
