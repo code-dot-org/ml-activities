@@ -21,7 +21,7 @@ The project automatically deploys to GitHub Pages on pushes to `main`. The deplo
 - Runs tests and builds the project (`yarn test && yarn build`)
 - Copies public assets to dist folder
 - Deploys to `gh-pages` branch using GitHub Actions
-- publishes to https://code-dot-org.github.io/ml-activities/
+- Publishes to https://code-dot-org.github.io/ml-activities/
 
 ## Getting started
 
