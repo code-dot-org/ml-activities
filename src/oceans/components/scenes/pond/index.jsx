@@ -267,11 +267,19 @@ let UnwrappedPond = class Pond extends React.Component {
     }
   };
 
-  toggleRecall = e => {
+  // true for matching. false for non-matching.
+  getMatching = (e, showMatching) => {
     const state = getState();
 
     // No-op if transition is already in progress.
     if (state.pondFishTransitionStartTime) {
+      return;
+    }
+
+    // Only switch if we're not already showing that view.
+    // recallFish are fish that are not matching the word/attribute.
+    // pondFish are fish that are matching the word/attribute.
+    if (state.showRecallFish !== showMatching) {
       return;
     }
 
@@ -293,9 +301,9 @@ let UnwrappedPond = class Pond extends React.Component {
 
     if (currentFishSet.length === 0) {
       // Immediately transition to nextFishSet rather than waiting for empty animation.
-      setState({showRecallFish: !state.showRecallFish, pondClickedFish: null, pondFocusedFishIndex: null});
+      setState({showRecallFish: !state.showRecallFish, pondClickedFish: null});
     } else {
-      setState({pondFishTransitionStartTime: $time(), pondClickedFish: null, pondFocusedFishIndex: null});
+      setState({pondFishTransitionStartTime: $time(), pondClickedFish: null});
     }
 
     if (e) {
@@ -436,8 +444,9 @@ let UnwrappedPond = class Pond extends React.Component {
         <div style={recallIconsStyle}>
           <button
             type="button"
-            onClick={this.toggleRecall}
+            onClick={e => this.getMatching(e, true)}
             aria-label={I18n.t('switchToMatchingItems')}
+            aria-pressed={!state.showRecallFish}
             style={{
               ...styles.recallIcon,
               ...{borderTopLeftRadius: 8, borderBottomLeftRadius: 8},
@@ -451,8 +460,9 @@ let UnwrappedPond = class Pond extends React.Component {
           </button>
           <button
             type="button"
-            onClick={this.toggleRecall}
+            onClick={e => this.getMatching(e, false)}
             aria-label={I18n.t('switchToNonMatchingItems')}
+            aria-pressed={state.showRecallFish}
             style={{
               ...styles.recallIcon,
               ...{borderTopRightRadius: 8, borderBottomRightRadius: 8},
