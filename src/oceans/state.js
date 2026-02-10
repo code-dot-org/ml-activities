@@ -31,6 +31,7 @@ const initialState = {
   currentInstructionsPage: 0,
   pondFishBounds: null,
   pondClickedFish: null,
+  pondFocusedFishIndex: null,
   pondPanelShowing: false,
   pondPanelSide: null,
   pondFishMaxExplainValue: 1,

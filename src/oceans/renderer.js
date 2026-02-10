@@ -605,7 +605,7 @@ const drawPondFishImages = () => {
 
   // Draw all the unclicked fish first, then the clicked fish.
   [false, true].forEach(drawClickedFish => {
-    fishes.forEach(fish => {
+    fishes.forEach((fish, fishIndex) => {
       const pondClickedFish = getState().pondClickedFish;
       const pondClickedFishUs = !!(
         pondClickedFish && fish.id === pondClickedFish.id
@@ -630,6 +630,21 @@ const drawPondFishImages = () => {
         const size = pondClickedFishUs ? 1 : 0.5;
 
         const fishBound = drawSingleFish(fish, finalX, finalY, ctx, size);
+
+        // Draw focus indicator for keyboard-focused fish
+        const pondFocusedFishIndex = getState().pondFocusedFishIndex;
+        if (pondFocusedFishIndex === fishIndex && !pondClickedFishUs) {
+          ctx.strokeStyle = '#FFD700'; // Gold color for focus
+          ctx.lineWidth = 4;
+          ctx.setLineDash([10, 5]); // Dashed line
+          ctx.strokeRect(
+            fishBound.x - 5,
+            fishBound.y - 5,
+            fishBound.w + 10,
+            fishBound.h + 10
+          );
+          ctx.setLineDash([]); // Reset to solid line
+        }
 
         // Record this screen location so that we can separately check for clicks on it.
         fishBounds.push({

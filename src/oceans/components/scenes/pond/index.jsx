@@ -38,6 +38,235 @@ let UnwrappedPond = class Pond extends React.Component {
     super(props);
   }
 
+  componentDidMount() {
+    window.addEventListener('keydown', this.handleKeyDown);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('keydown', this.handleKeyDown);
+  }
+
+  handleKeyDown = e => {
+    // Don't allow keyboard navigation if a Guide is currently showing.
+    if (guide.getCurrentGuide()) {
+      return;
+    }
+
+    const state = getState();
+    const fishCollection = state.showRecallFish
+      ? state.recallFish
+      : state.pondFish;
+
+    if (fishCollection.length === 0) {
+      return;
+    }
+
+    const currentIndex = state.pondFocusedFishIndex;
+
+    // Handle Escape key to clear selection and exit fish navigation
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      setState({pondClickedFish: null, pondFocusedFishIndex: null});
+      soundLibrary.playSound('no');
+      return;
+    }
+
+    // Handle Enter key to select focused fish
+    if (e.key === 'Enter' && currentIndex !== null) {
+      e.preventDefault();
+      this.selectFishByIndex(currentIndex);
+      return;
+    }
+
+    // Handle arrow keys for fish navigation
+    if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+      e.preventDefault();
+
+      let newIndex;
+      if (currentIndex === null) {
+        // If no fish is focused, start at the top-left fish
+        newIndex = this.getTopLeftFishIndex(fishCollection);
+      } else {
+        // Navigate based on key pressed using spatial positions
+        if (e.key === 'ArrowRight') {
+          newIndex = this.getNextFishInDirection(fishCollection, currentIndex, 'right');
+        } else if (e.key === 'ArrowLeft') {
+          newIndex = this.getNextFishInDirection(fishCollection, currentIndex, 'left');
+        } else if (e.key === 'ArrowDown') {
+          newIndex = this.getNextFishInDirection(fishCollection, currentIndex, 'down');
+        } else if (e.key === 'ArrowUp') {
+          newIndex = this.getNextFishInDirection(fishCollection, currentIndex, 'up');
+        }
+      }
+
+      setState({pondFocusedFishIndex: newIndex});
+    }
+
+    // Handle Tab - exit fish navigation mode and let Tab work normally
+    if (e.key === 'Tab' && currentIndex !== null) {
+      // Clear fish focus so Tab can move to buttons/other elements
+      setState({pondFocusedFishIndex: null});
+      // Don't preventDefault - let Tab continue to next focusable element
+    }
+  };
+
+  getTopLeftFishIndex = fishCollection => {
+    // Find the fish with the smallest y, then smallest x (top-left)
+    let topLeftIndex = 0;
+    let minY = fishCollection[0].getXY().y;
+    let minX = fishCollection[0].getXY().x;
+
+    fishCollection.forEach((fish, index) => {
+      const xy = fish.getXY();
+      if (xy.y < minY || (xy.y === minY && xy.x < minX)) {
+        minY = xy.y;
+        minX = xy.x;
+        topLeftIndex = index;
+      }
+    });
+
+    return topLeftIndex;
+  };
+
+  getNextFishInDirection = (fishCollection, currentIndex, direction) => {
+    const currentFish = fishCollection[currentIndex];
+    const currentXY = currentFish.getXY();
+
+    let bestIndex = currentIndex;
+    let bestDistance = Infinity;
+
+    fishCollection.forEach((fish, index) => {
+      if (index === currentIndex) {
+        return;
+      }
+
+      const xy = fish.getXY();
+      const dx = xy.x - currentXY.x;
+      const dy = xy.y - currentXY.y;
+
+      let isInDirection = false;
+      let primaryDistance = 0;
+      let secondaryDistance = 0;
+
+      switch (direction) {
+        case 'right':
+          // Fish must be to the right (larger x)
+          if (dx > 20) {
+            isInDirection = true;
+            primaryDistance = dx;
+            secondaryDistance = Math.abs(dy);
+          }
+          break;
+        case 'left':
+          // Fish must be to the left (smaller x)
+          if (dx < -20) {
+            isInDirection = true;
+            primaryDistance = Math.abs(dx);
+            secondaryDistance = Math.abs(dy);
+          }
+          break;
+        case 'down':
+          // Fish must be below (larger y)
+          if (dy > 20) {
+            isInDirection = true;
+            primaryDistance = dy;
+            secondaryDistance = Math.abs(dx);
+          }
+          break;
+        case 'up':
+          // Fish must be above (smaller y)
+          if (dy < -20) {
+            isInDirection = true;
+            primaryDistance = Math.abs(dy);
+            secondaryDistance = Math.abs(dx);
+          }
+          break;
+      }
+
+      if (isInDirection) {
+        // Prefer fish that are closer in the primary direction
+        // and have smaller secondary offset (more aligned)
+        const distance = primaryDistance + secondaryDistance * 0.5;
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          bestIndex = index;
+        }
+      }
+    });
+
+    // If no fish found in that direction, wrap around or stay put
+    if (bestIndex === currentIndex) {
+      // For left/right arrow keys, wrap around to start/end
+      if (direction === 'right') {
+        return this.getTopLeftFishIndex(fishCollection);
+      } else if (direction === 'left') {
+        return this.getBottomRightFishIndex(fishCollection);
+      }
+      // For up/down, stay at current position (no wrap-around)
+      return currentIndex;
+    }
+
+    return bestIndex;
+  };
+
+  getBottomRightFishIndex = fishCollection => {
+    // Find the fish with the largest y, then largest x (bottom-right)
+    let bottomRightIndex = 0;
+    let maxY = fishCollection[0].getXY().y;
+    let maxX = fishCollection[0].getXY().x;
+
+    fishCollection.forEach((fish, index) => {
+      const xy = fish.getXY();
+      if (xy.y > maxY || (xy.y === maxY && xy.x > maxX)) {
+        maxY = xy.y;
+        maxX = xy.x;
+        bottomRightIndex = index;
+      }
+    });
+
+    return bottomRightIndex;
+  };
+
+  selectFishByIndex = index => {
+    const state = getState();
+    const fishCollection = state.showRecallFish
+      ? state.recallFish
+      : state.pondFish;
+
+    if (index < 0 || index >= fishCollection.length) {
+      return;
+    }
+
+    const fish = fishCollection[index];
+    const fishBound = state.pondFishBounds.find(fb => fb.fishId === fish.id);
+
+    if (fishBound) {
+      setState({
+        pondClickedFish: {
+          id: fishBound.fishId,
+          x: fishBound.x,
+          y: fishBound.y
+        }
+      });
+      soundLibrary.playSound('yes');
+
+      if (
+        state.appMode === AppMode.FishShort ||
+        state.appMode === AppMode.FishLong
+      ) {
+        setState({
+          pondExplainFishSummary: state.trainer.explainFish(fish)
+        });
+        // Position panel based on fish location
+        if (fishBound.x < constants.canvasWidth / 2) {
+          setState({pondPanelSide: 'right'});
+        } else {
+          setState({pondPanelSide: 'left'});
+        }
+      }
+    }
+  };
+
   toggleRecall = e => {
     const state = getState();
 
@@ -64,9 +293,9 @@ let UnwrappedPond = class Pond extends React.Component {
 
     if (currentFishSet.length === 0) {
       // Immediately transition to nextFishSet rather than waiting for empty animation.
-      setState({showRecallFish: !state.showRecallFish, pondClickedFish: null});
+      setState({showRecallFish: !state.showRecallFish, pondClickedFish: null, pondFocusedFishIndex: null});
     } else {
-      setState({pondFishTransitionStartTime: $time(), pondClickedFish: null});
+      setState({pondFishTransitionStartTime: $time(), pondClickedFish: null, pondFocusedFishIndex: null});
     }
 
     if (e) {
@@ -151,8 +380,16 @@ let UnwrappedPond = class Pond extends React.Component {
       });
 
       if (!fishClicked) {
-        setState({pondClickedFish: null});
+        setState({pondClickedFish: null, pondFocusedFishIndex: null});
         soundLibrary.playSound('no');
+      } else {
+        // Sync focused index with clicked fish
+        const clickedFishIndex = fishCollection.findIndex(
+          f => f.id === state.pondClickedFish.id
+        );
+        if (clickedFishIndex !== -1) {
+          setState({pondFocusedFishIndex: clickedFishIndex});
+        }
       }
     }
   };
@@ -190,7 +427,12 @@ let UnwrappedPond = class Pond extends React.Component {
 
     return (
       <Body>
-        <div onClick={this.onPondClick} style={styles.pondSurface} />
+        <div
+          onClick={this.onPondClick}
+          style={styles.pondSurface}
+          tabIndex={0}
+          aria-label="Pond with fish - use arrow keys to navigate, Enter to select, Escape to deselect, Tab to navigate to buttons"
+        />
         <div style={recallIconsStyle}>
           <button
             type="button"
@@ -243,7 +485,7 @@ let UnwrappedPond = class Pond extends React.Component {
                 <Button
                   style={styles.playAgainButton}
                   onClick={() => {
-                    setState({pondClickedFish: null, pondPanelShowing: false});
+                    setState({pondClickedFish: null, pondFocusedFishIndex: null, pondPanelShowing: false});
                     helpers.resetTraining(state);
                     modeHelpers.toMode(Modes.Words);
                   }}
@@ -264,7 +506,7 @@ let UnwrappedPond = class Pond extends React.Component {
                 style={styles.backButton}
                 onClick={() => {
                   modeHelpers.toMode(Modes.Training);
-                  setState({pondClickedFish: null, pondPanelShowing: false});
+                  setState({pondClickedFish: null, pondFocusedFishIndex: null, pondPanelShowing: false});
                 }}
               >
                 {I18n.t('trainMore')}
