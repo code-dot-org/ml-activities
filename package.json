@@ -16,9 +16,9 @@
     "setupTestFrameworkScriptFile": "<rootDir>/test/setup.js"
   },
   "scripts": {
-    "build": "webpack -p",
+    "build": "NODE_OPTIONS=--openssl-legacy-provider webpack -p",
     "start": "yarn run dev",
-    "dev": "webpack-dev-server --mode development --content-base public --host 0.0.0.0 --disable-host-check",
+    "dev": "NODE_OPTIONS=--openssl-legacy-provider webpack-dev-server --mode development --content-base public --host 0.0.0.0 --disable-host-check",
     "lint": "eslint --ext .js,.jsx src",
     "test": "yarn run lint && jest",
     "test:unit": "jest ./test/unit/*.js",
@@ -100,7 +100,7 @@
     "@fortawesome/fontawesome-svg-core": "^1.2.25",
     "@fortawesome/free-solid-svg-icons": "^5.11.2",
     "@fortawesome/react-fontawesome": "^0.1.7",
-    "messageformat": "^1.1.0",
+    "messageformat": "^2.3.0",
     "react-typist": "^2.0.5"
   },
   "files": [
