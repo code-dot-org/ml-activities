@@ -16,9 +16,9 @@
     "setupTestFrameworkScriptFile": "<rootDir>/test/setup.js"
   },
   "scripts": {
-    "build": "NODE_OPTIONS=--openssl-legacy-provider webpack -p",
+    "build": "webpack -p",
     "start": "yarn run dev",
-    "dev": "NODE_OPTIONS=--openssl-legacy-provider webpack-dev-server --mode development --content-base public --host 0.0.0.0 --disable-host-check",
+    "dev": "webpack-dev-server --mode development --content-base public --host 0.0.0.0 --disable-host-check",
     "lint": "eslint --ext .js,.jsx src",
     "test": "yarn run lint && jest",
     "test:unit": "jest ./test/unit/*.js",
