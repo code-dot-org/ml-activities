@@ -42,7 +42,7 @@ let UnwrappedGuide = class Guide extends React.Component {
       this.guideDialogRef &&
       this.guideDialogRef.current
     ) {
-      this.guideDialogRef.current.focus();
+      this.guideDialogRef.current.focus({focusVisible: false});
       this.lastFocusedGuideId = currentGuideId;
     } else if (!currentGuide) {
       this.lastFocusedGuideId = null;
