@@ -1,0 +1,16 @@
+{
+  "areYouSure": "Je i sigurtë?",
+  "cancel": "Anulo",
+  "continue": "Vazhdo ",
+  "didYouKnow": "A e dinit?",
+  "finish": "Përfundo",
+  "fishlong-pond-init1": "Bazuar në trajnimin tuaj, AI identifikoi {n, plural,one {këtë} other {këta}} peshq si “{word}”. Si bëri AI?",
+  "fishlong-training-pause1": "A është e drejtë të përdorësh inteligjencën artificiale për të gjykuar peshkun sipas pamjes së tij? Ndërsa AI mund të duket e drejtë dhe neutrale, analiza e saj vjen nga trajnimi që ne ofrojmë. Çfarë paragjykimi të padëshiruar mund të shkaktojë kjo?",
+  "fishshort-pond-init1": "Bazuar në trajnimin tuaj, AI identifikoi {n, plural,one {këtë} other {këta}} peshq si “{word}”. Si bëri AI? Ju mund të trajnoni më shumë nëse doni të përmirësoni rezultatet.",
+  "fishvtrash-training-init1": "Mbeturinat e hedhura në ujë ndikojnë në jetën detare. Në këtë aktivitet, ju do të programoni ose trajnoni AI (inteligjencën artificiale) për të identifikuar peshkun ose plehrat. Le të pastrojmë oqeanin! Klikoni kudo në ekran për të vazhduar.",
+  "isThisAFish": "A është ky një peshk?",
+  "mostImportantPartsDescription": "Këto ishin pjesët më të rëndësishme të peshkut në përcaktimin nëse ky peshk ishte “*{word}*” ose “**{notWord}**”.",
+  "no": "Jo",
+  "run": "Ekzekuto",
+  "yes": "Po"
+}
