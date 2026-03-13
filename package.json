@@ -30,7 +30,9 @@
     "test:unit": "jest ./test/unit/*.js",
     "preversion": "yarn install && yarn run test",
     "version": "yarn run build",
-    "postversion": "git push && git push --tags && yarn publish"
+    "postversion": "git push && git push --tags && yarn publish",
+    "sync-i18n": "node bin/syncTranslations.js",
+    "sync-i18n:local": "node bin/syncTranslations.js --local"
   },
   "repository": {
     "type": "git",

@@ -82,6 +82,10 @@ const firstConfigOnly = {
         {
           from: 'src/oceans/*.bin',
           to: 'models/[name][ext]'
+        },
+        {
+          from: 'i18n/locales/*.json',
+          to: 'locales/[name][ext]'
         }
       ]
     })

@@ -28,7 +28,7 @@ export const initAll = function(options) {
 
   soundLibrary.loadSounds();
 
-  I18n.initI18n(options.i18n);
+  I18n.initI18n(options.i18n, options.locale);
 
   // Set initial state for UI elements.
   setInitialState({
