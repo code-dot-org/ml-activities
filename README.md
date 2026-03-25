@@ -171,7 +171,7 @@ The activity is configured via query parameters. To embed a specific level in an
 Available query parameters:
 
 - **`mode`** — Which level to run. One of: `fishvtrash`, `creaturesvtrashdemo`, `creaturesvtrash`, `short`, `long`.
-- **`tts`** — Locale code for translated strings (e.g. `es_es`, `pt_br`, `ja_jp`). When set, the activity loads the corresponding translation file from the `locales/` directory. If the locale is not found, it falls back to English. See `i18n/locales/` for available translations.
+- **`locale`** — Locale code for translated strings (e.g. `es_es`, `pt_br`, `ja_jp`). When set, the activity loads the corresponding translation file from the `locales/` directory. If the locale is not found, it falls back to English. See `i18n/locales/` for available translations.
 
 ## Getting started
 
