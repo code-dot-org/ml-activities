@@ -39,7 +39,9 @@ function initDemoPage() {
     const langCode = locale.split('_')[0];
     fetch(`locales/${locale}.json`)
       .then(r => {
-        if (!r.ok) throw new Error(`Failed to load locale: ${locale}`);
+        if (!r.ok) {
+          throw new Error(`Failed to load locale: ${locale}`);
+        }
         return r.json();
       })
       .then(localeData => {
