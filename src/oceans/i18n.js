@@ -3,10 +3,25 @@ import MessageFormat from 'messageformat'
 
 let messages;
 
-const initI18n = (i18n = {}) => {
-  // For now, use English pluralization rules.
-  const mf = new MessageFormat('en');
-  messages = {...mf.compile(data), ...i18n};
+const initI18n = (i18n = {}, locale = 'en') => {
+  const mf = new MessageFormat(locale);
+
+  // Compile English defaults as the base.
+  const compiled = mf.compile(data);
+
+  // If overrides were provided, determine whether they are raw strings
+  // (from a JSON locale file) or pre-compiled functions (from the host app).
+  let compiledOverrides = {};
+  const values = Object.values(i18n);
+  if (values.length > 0) {
+    if (typeof values[0] === 'string') {
+      compiledOverrides = mf.compile(i18n);
+    } else {
+      compiledOverrides = i18n;
+    }
+  }
+
+  messages = {...compiled, ...compiledOverrides};
 };
 
 const t = (key, options) => {

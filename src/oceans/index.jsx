@@ -9,6 +9,7 @@ import {stopTypingSounds} from '@ml/oceans/components/common/Guide';
 let currentAppMode = queryStrFor('mode') || 'fishvtrash';
 const currentGuides = queryStrFor('guides');
 let textToSpeechLocale = queryStrFor('tts');
+const locale = queryStrFor('locale');
 let canvas, backgroundCanvas;
 
 function onLevelChange(event) {
@@ -22,7 +23,7 @@ function onLevelChange(event) {
 function initDemoPage() {
   const sounds = new Sounds();
 
-  initAll({
+  const options = {
     appMode: currentAppMode,
     guides: currentGuides,
     textToSpeechLocale,
@@ -31,7 +32,28 @@ function initDemoPage() {
     backgroundCanvas,
     playSound: sounds.play.bind(sounds),
     registerSound: sounds.register.bind(sounds)
-  });
+  };
+
+  if (locale) {
+    // Extract language code from locale (e.g. 'es_es' -> 'es')
+    const langCode = locale.split('_')[0];
+    fetch(`locales/${locale}.json`)
+      .then(r => {
+        if (!r.ok) {
+          throw new Error(`Failed to load locale: ${locale}`);
+        }
+        return r.json();
+      })
+      .then(localeData => {
+        initAll({...options, i18n: localeData, locale: langCode});
+      })
+      .catch(err => {
+        console.warn(`Locale ${locale} not found, falling back to English:`, err);
+        initAll(options);
+      });
+  } else {
+    initAll(options);
+  }
 }
 
 function onContinue() {

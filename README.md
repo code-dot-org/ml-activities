@@ -146,6 +146,33 @@ If Google Analytics is available on the page, the app generates a synthetic page
 
 The documentation for common operations for **AI Lab** is comprehensive and should apply to this project too: https://github.com/code-dot-org/ml-playground#common-operations
 
+### Publishing and hosting the activity
+
+When changes are merged to `main`, the CI workflow automatically builds the project and deploys it to the `gh-pages` branch, making it available via GitHub Pages.
+
+To build and host the activity yourself:
+
+1. Build the production bundle:
+   ```
+   yarn build
+   ```
+2. Copy the static assets into the build output:
+   ```
+   cp -r public/* dist
+   ```
+3. Serve the `dist/` directory from any static file host (e.g. GitHub Pages, S3, Netlify, or a simple HTTP server). The entry point is `dist/index.html`.
+
+The activity is configured via query parameters. To embed a specific level in an iframe:
+
+```html
+<iframe src="https://your-host.example.com/?mode=fishvtrash&tts=es_es" width="930" height="600"></iframe>
+```
+
+Available query parameters:
+
+- **`mode`** — Which level to run. One of: `fishvtrash`, `creaturesvtrashdemo`, `creaturesvtrash`, `short`, `long`.
+- **`locale`** — Locale code for translated strings (e.g. `es_es`, `pt_br`, `ja_jp`). When set, the activity loads the corresponding translation file from the `locales/` directory. If the locale is not found, it falls back to English. See `i18n/locales/` for available translations.
+
 ## Getting started
 
 Steps to get up and running:
