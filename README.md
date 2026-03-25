@@ -162,13 +162,16 @@ To build and host the activity yourself:
    ```
 3. Serve the `dist/` directory from any static file host (e.g. GitHub Pages, S3, Netlify, or a simple HTTP server). The entry point is `dist/index.html`.
 
-The activity mode is controlled via the `mode` query parameter. To embed a specific level in an iframe:
+The activity is configured via query parameters. To embed a specific level in an iframe:
 
 ```html
-<iframe src="https://your-host.example.com/?mode=fishvtrash" width="930" height="600"></iframe>
+<iframe src="https://your-host.example.com/?mode=fishvtrash&tts=es_es" width="930" height="600"></iframe>
 ```
 
-Available modes: `fishvtrash`, `creaturesvtrashdemo`, `creaturesvtrash`, `short`, `long`.
+Available query parameters:
+
+- **`mode`** — Which level to run. One of: `fishvtrash`, `creaturesvtrashdemo`, `creaturesvtrash`, `short`, `long`.
+- **`tts`** — Locale code for translated strings (e.g. `es_es`, `pt_br`, `ja_jp`). When set, the activity loads the corresponding translation file from the `locales/` directory. If the locale is not found, it falls back to English. See `i18n/locales/` for available translations.
 
 ## Getting started
 
